@@ -1,8 +1,6 @@
 import { getDataStore } from '@/lib/data-store';
 import { buildExistingRowIndex, classifyImportRows } from '@/lib/dedupe/dedupe-engine';
 import type { ImportPreviewResult, ImportRow } from './import-types';
-import { writeAuditLog } from '@/lib/audit/audit-log';
-import { AUDIT_EVENTS } from '@/lib/audit/audit-events';
 
 export async function previewImport(input: {
   loaiDuLieu: string;
@@ -32,6 +30,5 @@ export async function previewImport(input: {
     rows: classifiedRows,
     summary
   };
-  await writeAuditLog({ eventType: AUDIT_EVENTS.IMPORT_PREVIEW, actor: input.actor, target: input.tenFile, after: summary });
   return result;
 }

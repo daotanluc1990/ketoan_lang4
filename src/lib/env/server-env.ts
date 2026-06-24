@@ -4,6 +4,7 @@ const rawEnvSchema = z.object({
   DATA_STORE: z.enum(['local', 'google_sheets']).optional(),
   GOOGLE_SHEET_ID: z.string().optional(),
   GOOGLE_CLIENT_EMAIL: z.string().optional(),
+  GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().optional(),
   GOOGLE_PRIVATE_KEY: z.string().optional(),
 
   AI_PROVIDER: z.enum(['gemini', 'openai', 'none']).optional(),
@@ -45,6 +46,10 @@ function parsePositiveInteger(value: string | undefined, fallback: number) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function firstNonEmpty(...values: Array<string | undefined>) {
+  return values.find((value) => value && value.trim())?.trim();
+}
+
 function selectAiProvider(env: z.infer<typeof rawEnvSchema>): AiProvider {
   if (env.AI_PROVIDER) return env.AI_PROVIDER;
   if (env.GEMINI_API_KEY) return 'gemini';
@@ -58,7 +63,7 @@ export function getServerEnv() {
   return {
     dataStore: env.DATA_STORE ?? 'local',
     googleSheetId: env.GOOGLE_SHEET_ID,
-    googleClientEmail: env.GOOGLE_CLIENT_EMAIL,
+    googleClientEmail: firstNonEmpty(env.GOOGLE_CLIENT_EMAIL, env.GOOGLE_SERVICE_ACCOUNT_EMAIL),
     googlePrivateKey: normalizePrivateKey(env.GOOGLE_PRIVATE_KEY),
 
     aiProvider,
@@ -96,7 +101,7 @@ export function getEnvChecklist(): EnvCheck[] {
   return [
     { name: 'DATA_STORE', configured: env.dataStore === 'google_sheets' || env.dataStore === 'local', requiredFor: 'Chọn local hoặc Google Sheets' },
     { name: 'GOOGLE_SHEET_ID', configured: Boolean(env.googleSheetId), requiredFor: 'Đọc/ghi Google Sheet thật' },
-    { name: 'GOOGLE_CLIENT_EMAIL', configured: Boolean(env.googleClientEmail), requiredFor: 'Google service account' },
+    { name: 'GOOGLE_CLIENT_EMAIL', configured: Boolean(env.googleClientEmail), requiredFor: 'Google service account; cũng nhận GOOGLE_SERVICE_ACCOUNT_EMAIL để tương thích env cũ' },
     { name: 'GOOGLE_PRIVATE_KEY', configured: Boolean(env.googlePrivateKey), requiredFor: 'Google service account' },
     { name: 'AUTH_ENABLED', configured: env.authEnabled, requiredFor: 'Bật đăng nhập thật cho Vercel staging/production' },
     { name: 'AUTH_SESSION_SECRET', configured: Boolean(env.authSessionSecret), requiredFor: 'Ký session cookie server-side' },

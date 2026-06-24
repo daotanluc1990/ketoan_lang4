@@ -48,6 +48,18 @@ function statusFromFile(file: BatchPreviewFile) {
   return 'Đạt';
 }
 
+async function readImportResponse(response: Response) {
+  const contentType = response.headers.get('content-type') ?? '';
+  if (contentType.includes('application/json')) return response.json();
+  const text = await response.text().catch(() => '');
+  return {
+    ok: false,
+    message: text.trim()
+      ? `Server trả phản hồi không đúng dạng JSON: ${text.trim().slice(0, 160)}`
+      : 'Server không trả dữ liệu preview. Hãy đăng nhập lại hoặc thử lại.'
+  };
+}
+
 export function BatchUploadMock() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<BatchPreview | null>(null);
@@ -85,8 +97,9 @@ export function BatchUploadMock() {
       for (const file of selectedFiles) formData.append('files', file);
       formData.append('actor', 'web-ketoan');
       const response = await fetch('/api/import/preview', { method: 'POST', body: formData });
-      const payload = await response.json();
-      if (!response.ok || !payload.ok) throw new Error(payload.message ?? 'Không preview được batch.');
+      const payload = await readImportResponse(response);
+      if (!response.ok || !payload.ok) throw new Error(payload.message ?? 'Không preview được batch. Hãy kiểm tra đăng nhập và cấu hình Google Sheet.');
+      if (!payload.data?.files || !Array.isArray(payload.data.files)) throw new Error('API preview trả dữ liệu không đúng dạng batch. Hãy deploy lại bản mới nhất.');
       setPreview(payload.data);
       setMessage('Đã kiểm tra batch. Chỉ bấm Import file đạt khi Lỗi = 0, Lệch = 0 và Trạng thái = Đạt.');
     } catch (error) {
@@ -106,7 +119,7 @@ export function BatchUploadMock() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ batch: preview, actor: 'web-ketoan' })
       });
-      const payload = await response.json();
+      const payload = await readImportResponse(response);
       if (!response.ok || !payload.ok) throw new Error(payload.message ?? 'Không import được batch.');
       const writtenRows = Array.isArray(payload.results) ? payload.results.reduce((total: number, item: { writtenRows?: number }) => total + (item.writtenRows ?? 0), 0) : 0;
       setMessage(`Đã ghi Google Sheet: ${writtenRows} dòng mới. Hãy mở các sheet DL_* để kiểm tra từ dòng 4 trở xuống.`);

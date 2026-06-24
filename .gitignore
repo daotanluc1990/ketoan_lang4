@@ -11,3 +11,5 @@ out
 coverage
 
 tsconfig.tsbuildinfo
+
+.vercel
