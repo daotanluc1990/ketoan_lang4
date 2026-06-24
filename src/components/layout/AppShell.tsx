@@ -1,0 +1,92 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { clsx } from 'clsx';
+import { Sidebar } from './Sidebar';
+import { TopBar } from './TopBar';
+import { GlobalFilterBar } from './GlobalFilterBar';
+import { LoadingState } from '@/components/ui/LoadingState';
+import type { AuthUser } from '@/lib/auth/auth-types';
+
+const COLLAPSE_KEY = 'ctl-ceo-sidebar-collapsed';
+
+function readStoredBool(key: string, fallback: boolean) {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const value = window.localStorage.getItem(key);
+    return value === null ? fallback : value === 'true';
+  } catch {
+    return fallback;
+  }
+}
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(() => readStoredBool(COLLAPSE_KEY, false));
+  const isLoginPage = pathname === '/login';
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(() => !isLoginPage);
+
+  useEffect(() => {
+    if (isLoginPage) return;
+
+    let active = true;
+    fetch('/api/auth/me', { cache: 'no-store' })
+      .then(async (response) => {
+        const payload = await response.json().catch(() => null);
+        if (!active) return;
+        if (!response.ok || !payload?.authenticated || !payload?.user) {
+          const nextPath = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/login?next=${nextPath}`;
+          return;
+        }
+        setUser(payload.user);
+      })
+      .catch(() => {
+        if (!active) return;
+        const nextPath = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/login?next=${nextPath}`;
+      })
+      .finally(() => {
+        if (active) setCheckingAuth(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isLoginPage]);
+
+  const toggleCollapsed = () => {
+    setCollapsed((current: boolean) => {
+      const next = !current;
+      try { window.localStorage.setItem(COLLAPSE_KEY, String(next)); } catch {}
+      return next;
+    });
+  };
+
+  const contentPadding = useMemo(() => (collapsed ? 'lg:pl-[72px]' : 'lg:pl-64'), [collapsed]);
+
+  if (isLoginPage) return <>{children}</>;
+
+  if (checkingAuth || !user) {
+    return (
+      <div className="min-h-screen bg-lang-cream p-6 text-lang-ink">
+        <LoadingState label="Đang kiểm tra đăng nhập trước khi mở dữ liệu CEO/Kế toán..." />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-lang-cream text-lang-ink">
+      <Sidebar collapsed={collapsed} onToggle={toggleCollapsed} />
+      <div className={clsx('min-h-screen transition-[padding] duration-200', contentPadding)}>
+        <TopBar user={user} />
+        <GlobalFilterBar />
+        <main className="w-full px-3 py-3 sm:px-4 lg:px-5">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
