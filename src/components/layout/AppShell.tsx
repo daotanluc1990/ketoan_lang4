@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (checkingAuth || !user) {
     return (
-      <div className="min-h-screen bg-lang-cream p-6 text-lang-ink">
+      <div className="min-h-screen bg-lang-cream p-4 text-lang-ink">
         <LoadingState label="Đang kiểm tra đăng nhập trước khi mở dữ liệu CEO/Kế toán..." />
       </div>
     );
@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className={clsx('min-h-screen transition-[padding] duration-200', contentPadding)}>
         <TopBar user={user} />
         <GlobalFilterBar />
-        <main className="w-full px-3 py-3 sm:px-4 lg:px-5">
+        <main className="w-full px-2 py-2 sm:px-3 lg:px-3.5">
           {children}
         </main>
       </div>
