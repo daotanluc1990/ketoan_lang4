@@ -2,6 +2,7 @@ import { createFileHash } from '@/lib/import/file-hash';
 import { previewImport } from '@/lib/import/import-preview';
 import type { ImportPreviewResult } from '@/lib/import/import-types';
 import { parseExcelFile } from './excel-parsers';
+import { parseOperationalExcelFile } from './parse-operational-excel';
 import type { ExcelFileInput } from './import-parser-types';
 
 export type BatchImportPreview = {
@@ -28,7 +29,7 @@ export async function previewExcelBatch(files: ExcelFileInput[], actor: string):
   const maBatch = `BATCH-${Date.now()}`;
   const results = [];
   for (const file of files) {
-    const parsed = parseExcelFile(file);
+    const parsed = parseOperationalExcelFile(file) ?? parseExcelFile(file);
     const dauVetFile = createFileHash(file.buffer);
     const sheetDich = parsed.rows[0]?.sheetDich ?? 'KHONG_NHAN_DIEN';
     const preview = await previewImport({
