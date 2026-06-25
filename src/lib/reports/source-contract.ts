@@ -5,6 +5,8 @@ export type SourceKey =
   | 'appRevenue'
   | 'cashbook'
   | 'inventory'
+  | 'centralKitchenIssue'
+  | 'centralKitchenInventory'
   | 'lossRows'
   | 'debt'
   | 'purchase';
@@ -53,8 +55,8 @@ export const SOURCE_CONTRACTS: Record<SourceKey, SourceContract> = {
     label: 'Sổ quỹ',
     dateColumns: ['Ngày'],
     weekColumns: ['Mã tuần', 'Tuần'],
-    branchColumns: ['Chi nhánh'],
-    channelColumns: ['Phương thức', 'Nhóm thu/chi'],
+    branchColumns: ['Chi nhánh', 'Khu vực'],
+    channelColumns: ['Phương thức', 'Nhóm thu/chi', 'Kênh thu', 'Khu vực', 'Phân loại P&L'],
     statusColumns: ['Trạng thái dữ liệu'],
     alertStatusColumns: [],
     importedByColumns: ['Người import', 'Người tạo']
@@ -62,9 +64,33 @@ export const SOURCE_CONTRACTS: Record<SourceKey, SourceContract> = {
   inventory: {
     key: 'inventory',
     sheetName: SHEET_NAMES.DL_TON_KHO,
-    label: 'Tồn kho',
+    label: 'Tồn kho chi nhánh',
     dateColumns: ['Ngày kiểm kê'],
     weekColumns: [],
+    branchColumns: ['Chi nhánh'],
+    channelColumns: ['Nhóm hàng'],
+    statusColumns: ['Trạng thái dữ liệu'],
+    alertStatusColumns: ['Trạng thái tồn âm'],
+    importedByColumns: ['Người import']
+  },
+  centralKitchenIssue: {
+    key: 'centralKitchenIssue',
+    sheetName: SHEET_NAMES.DL_XUAT_KHO_BEP_TRUNG_TAM,
+    label: 'Xuất kho bếp trung tâm',
+    dateColumns: ['Ngày bắt đầu', 'Ngày kết thúc'],
+    weekColumns: ['Mã tuần', 'Tuần', 'Năm'],
+    branchColumns: ['Chi nhánh nhận'],
+    channelColumns: ['Chi nhánh xuất', 'Chi nhánh nhận', 'Loại hàng'],
+    statusColumns: ['Trạng thái dữ liệu'],
+    alertStatusColumns: [],
+    importedByColumns: ['Người import']
+  },
+  centralKitchenInventory: {
+    key: 'centralKitchenInventory',
+    sheetName: SHEET_NAMES.DL_TON_KHO_BEP_TRUNG_TAM,
+    label: 'Tồn kho bếp trung tâm',
+    dateColumns: ['Ngày bắt đầu', 'Ngày kết thúc'],
+    weekColumns: ['Mã tuần', 'Tuần', 'Năm'],
     branchColumns: ['Chi nhánh'],
     channelColumns: ['Nhóm hàng'],
     statusColumns: ['Trạng thái dữ liệu'],
