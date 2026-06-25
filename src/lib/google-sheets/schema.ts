@@ -13,23 +13,33 @@ export const GOOGLE_SHEETS_SCHEMA: SheetSchema[] = [
   },
   {
     sheetName: 'DL_SO_QUY',
-    description: 'Dữ liệu gốc từ file sổ quỹ.',
-    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Ngày', 'Năm', 'Tháng', 'Tuần', 'Mã tuần', 'Chi nhánh', 'Loại giao dịch', 'Nhóm thu/chi', 'Diễn giải', 'Số tiền', 'Phương thức', 'Số dư sau giao dịch', 'Người tạo', 'Tên file nguồn', 'Dấu vết dòng', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
+    description: 'Dữ liệu gốc từ file sổ quỹ. Có phân loại thu doanh thu, thu khác, chi cửa hàng, chi bếp trung tâm và trả NCC.',
+    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Mã phiếu', 'Ngày', 'Năm', 'Tháng', 'Tuần', 'Mã tuần', 'Chi nhánh', 'Khu vực', 'Loại giao dịch', 'Nhóm thu/chi', 'Kênh thu', 'Loại thu', 'Diễn giải', 'Ghi chú', 'Số tiền', 'Phương thức', 'Số dư sau giao dịch', 'Người tạo', 'Phân loại P&L', 'Tên file nguồn', 'Dấu vết file', 'Dấu vết dòng', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
   },
   {
     sheetName: 'DL_TON_KHO',
-    description: 'Dữ liệu gốc từ file tồn kho.',
-    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Ngày kiểm kê', 'Chi nhánh', 'Mã hàng', 'Tên hàng', 'Nhóm hàng', 'Đơn vị tính', 'Tồn kho', 'Giá trị tồn', 'Trạng thái tồn âm', 'Định mức tồn tối thiểu', 'Định mức tồn tối đa', 'Tên file nguồn', 'Dấu vết dòng', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
+    description: 'Dữ liệu gốc từ file tồn kho chi nhánh.',
+    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Ngày kiểm kê', 'Chi nhánh', 'Mã hàng', 'Tên hàng', 'Nhóm hàng', 'Đơn vị tính', 'Tồn kho', 'Giá trị tồn', 'Trạng thái tồn âm', 'Định mức tồn tối thiểu', 'Định mức tồn tối đa', 'Tên file nguồn', 'Dấu vết file', 'Dấu vết dòng', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
+  },
+  {
+    sheetName: 'DL_XUAT_KHO_BEP_TRUNG_TAM',
+    description: 'Dữ liệu từ file Xuất Hủy KiotViet. Theo quy ước vận hành: Xuất hủy = bếp trung tâm xuất kho cho chi nhánh.',
+    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Kỳ báo cáo', 'Năm', 'Tháng', 'Tuần', 'Mã tuần', 'Ngày bắt đầu', 'Ngày kết thúc', 'Chi nhánh xuất', 'Chi nhánh nhận', 'Mã hàng', 'Tên hàng', 'Loại hàng', 'Đơn vị tính', 'Số lượng xuất', 'Tổng giá trị xuất', 'Đơn giá tạm tính', 'Nguồn nghiệp vụ', 'Ghi chú', 'Tên file nguồn', 'Dấu vết file', 'Dấu vết dòng', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
+  },
+  {
+    sheetName: 'DL_TON_KHO_BEP_TRUNG_TAM',
+    description: 'Dữ liệu xuất nhập tồn bếp trung tâm để kiểm soát tồn kho, tồn âm, nhập/xuất và giá trị tồn.',
+    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Kỳ báo cáo', 'Năm', 'Tháng', 'Tuần', 'Mã tuần', 'Ngày bắt đầu', 'Ngày kết thúc', 'Chi nhánh', 'Mã hàng', 'Tên hàng', 'Nhóm hàng', 'Đơn vị tính', 'Tồn đầu kỳ', 'Nhập trong kỳ', 'Xuất trong kỳ', 'Tồn cuối kỳ', 'Giá trị tồn đầu', 'Giá trị nhập', 'Giá trị xuất', 'Giá trị tồn cuối', 'Trạng thái tồn âm', 'Ghi chú', 'Tên file nguồn', 'Dấu vết file', 'Dấu vết dòng', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
   },
   {
     sheetName: 'DL_THAT_THOAT_NVL',
-    description: 'Dữ liệu gốc từ file báo cáo thất thoát NVL tuần.',
-    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Chi nhánh', 'Năm', 'Tuần', 'Mã tuần', 'Tuần bắt đầu', 'Tuần kết thúc', 'Tên nguyên vật liệu', 'Loại nguyên vật liệu', 'Đơn vị tính', 'Tồn đầu kỳ', 'Nhập trong kỳ', 'Nhập từ bếp trung tâm', 'Nhập từ nhà cung cấp', 'Tiêu hao lý thuyết theo bán hàng', 'Tồn cuối kỳ lý thuyết', 'Tồn cuối kỳ thực tế', 'Tồn cuối từ sổ', 'Chênh lệch số lượng', 'Loại chênh lệch', 'Đơn giá', 'Giá trị chênh lệch', 'Tỷ lệ thất thoát', 'Định mức cho phép', 'Mức vượt định mức', 'Trạng thái', 'Ghi chú', 'Nguyên nhân AI đề xuất', 'Hành động đề xuất', 'Người phụ trách', 'Deadline xử lý', 'Tên file nguồn', 'Dấu vết dòng', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
+    description: 'Dữ liệu gốc/kết quả từ báo cáo thất thoát NVL tuần.',
+    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Chi nhánh', 'Năm', 'Tuần', 'Mã tuần', 'Tuần bắt đầu', 'Tuần kết thúc', 'Tên nguyên vật liệu', 'Loại nguyên vật liệu', 'Đơn vị tính', 'Tồn đầu kỳ', 'Nhập trong kỳ', 'Nhập từ bếp trung tâm', 'Nhập từ nhà cung cấp', 'Tiêu hao lý thuyết theo bán hàng', 'Tồn cuối kỳ lý thuyết', 'Tồn cuối kỳ thực tế', 'Tồn cuối từ sổ', 'Chênh lệch số lượng', 'Loại chênh lệch', 'Đơn giá', 'Giá trị chênh lệch', 'Tỷ lệ thất thoát', 'Định mức cho phép', 'Mức vượt định mức', 'Trạng thái', 'Ghi chú', 'Nguyên nhân AI đề xuất', 'Hành động đề xuất', 'Người phụ trách', 'Deadline xử lý', 'Tên file nguồn', 'Dấu vết file', 'Dấu vết dòng', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
   },
   {
     sheetName: 'DL_CONG_NO',
-    description: 'Dữ liệu công nợ để mở rộng báo cáo cân đối.',
-    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Ngày', 'Năm', 'Tháng', 'Tuần', 'Mã tuần', 'Chi nhánh', 'Nhà cung cấp/Đối tượng', 'Nhóm công nợ', 'Phải trả', 'Đã trả', 'Còn phải trả', 'Đến hạn', 'Quá hạn', 'Cần CEO duyệt', 'Ghi chú', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
+    description: 'Dữ liệu công nợ NCC để đối chiếu tiền trả NCC và số còn phải trả.',
+    columns: ['Mã dòng dữ liệu', 'Mã lần import', 'Ngày', 'Năm', 'Tháng', 'Tuần', 'Mã tuần', 'Chi nhánh', 'Nhà cung cấp/Đối tượng', 'Nhóm công nợ', 'Nợ đầu kỳ', 'Ghi nợ', 'Ghi có', 'Phải trả', 'Đã trả', 'Còn phải trả', 'Đến hạn', 'Quá hạn', 'Cần CEO duyệt', 'Ghi chú', 'Trạng thái dữ liệu', 'Ngày import', 'Người import']
   },
   {
     sheetName: 'DL_THU_MUA',
