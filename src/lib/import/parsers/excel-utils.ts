@@ -33,12 +33,22 @@ export function rowsAsMatrix(sheet: XLSX.WorkSheet) {
 
 export function toNumber(value: unknown): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
-  const normalized = String(value ?? '')
-    .replace(/\s/g, '')
-    .replace(/,/g, '')
-    .replace(/%/g, '');
-  const number = Number(normalized);
-  return Number.isFinite(number) ? number : 0;
+  let text = String(value ?? '').trim();
+  if (!text) return 0;
+  const isNegative = text.startsWith('-') || (text.startsWith('(') && text.endsWith(')'));
+  text = text.replace(/[()]/g, '').replace(/-/g, '').replace(/\s/g, '').replace(/%/g, '');
+  text = text.replace(/đ/g, '').replace(/₫/g, '');
+
+  if (text.includes(',') && text.includes('.')) {
+    text = text.replace(/\./g, '').replace(',', '.');
+  } else if (text.includes(',')) {
+    const parts = text.split(',');
+    text = parts.length === 2 && parts[1].length <= 2 ? `${parts[0]}.${parts[1]}` : text.replace(/,/g, '');
+  }
+
+  const number = Number(text);
+  if (!Number.isFinite(number)) return 0;
+  return isNegative ? -Math.abs(number) : number;
 }
 
 export function toDateString(value: unknown): string {
@@ -75,6 +85,7 @@ export function getWeekCode(dateText: string) {
 export function inferBranch(value?: unknown) {
   const text = String(value ?? '').toUpperCase();
   if (text.includes('NVT') || text.includes('NGUYỄN VĂN TĂNG') || text.includes('LANG NVT') || text.includes('LÀNG NVT')) return 'NVT';
+  if (text.includes('TRUNG TÂM') || text.includes('BEP TRUNG TAM') || text.includes('BẾP TRUNG TÂM')) return 'Bếp Trung Tâm';
   return String(value ?? 'NVT') || 'NVT';
 }
 
@@ -84,6 +95,7 @@ export function normalizeChannel(raw: string) {
   if (text.includes('spf') || text.includes('shopee')) return 'ShopeeFood';
   if (text.includes('befood') || text.includes('be food')) return 'BeFood';
   if (text.includes('xanh')) return 'Xanh';
+  if (text.includes('momo')) return 'MoMo';
   if (text.includes('trực tiếp') || text.includes('tien mat') || text.includes('tiền mặt')) return 'Offline';
   return raw.trim();
 }
