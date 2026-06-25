@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 const kpiCopy: Record<string, string> = {
   "Tổng doanh thu": "Cửa hàng + App",
   "Doanh thu cửa hàng": "Offline + MoMo",
-  "Doanh thu app net": "Sau phí app",
+  "Doanh thu app net": "Kênh app",
   "Tiền vào": "Đã ghi nhận thu",
   "Tiền ra": "Đã ghi nhận chi",
   "Dòng tiền tạm": "Thu - chi",
