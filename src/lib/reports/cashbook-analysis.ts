@@ -17,6 +17,7 @@ export type CashbookAnalysis = {
   nccPaymentOut: number;
   capexOut: number;
   operatingOut: number;
+  centralKitchenOut: number;
 };
 
 type ClassifiedExpense = {
@@ -43,9 +44,23 @@ function includesAny(text: string, keywords: string[]) {
   return keywords.some((keyword) => text.includes(normalizeText(keyword)));
 }
 
+function cashbookArea(row: DataRow) {
+  const explicit = normalizeText(`${pickText(row, ['Khu vực'])} ${pickText(row, ['Phân loại P&L'])}`);
+  const description = normalizeText(`${pickText(row, ['Diễn giải'])} ${pickText(row, ['Nhóm thu/chi'])} ${pickText(row, ['Ghi chú'])} ${pickText(row, ['Chi nhánh'])}`);
+  if (includesAny(`${explicit} ${description}`, ['bếp trung tâm', 'bep trung tam', 'chi nhánh trung tâm', 'chi nhanh trung tam', 'chi bếp trung tâm', 'chi bep trung tam'])) return 'Bếp Trung Tâm';
+  if (includesAny(`${explicit} ${description}`, ['nvt', 'nguyễn văn tăng', 'nguyen van tang', 'làng nvt', 'lang nvt'])) return 'NVT';
+  return pickText(row, ['Khu vực', 'Chi nhánh']) || 'Chưa rõ';
+}
+
 export function classifyCashbookExpense(row: DataRow) {
-  const description = normalizeText(`${pickText(row, ['Diễn giải'])} ${pickText(row, ['Nhóm thu/chi'])} ${pickText(row, ['Người tạo'])}`);
+  const description = normalizeText(`${pickText(row, ['Diễn giải'])} ${pickText(row, ['Nhóm thu/chi'])} ${pickText(row, ['Người tạo'])} ${pickText(row, ['Ghi chú'])} ${pickText(row, ['Phân loại P&L'])}`);
   const originalGroup = pickText(row, ['Nhóm thu/chi']);
+  const pnlClass = normalizeText(pickText(row, ['Phân loại P&L']));
+  const area = cashbookArea(row);
+
+  if (pnlClass === normalizeText('Chi Bếp Trung Tâm') || area === 'Bếp Trung Tâm') {
+    return { category: 'Chi Bếp Trung Tâm', status: 'Cần theo dõi riêng', action: 'Không trộn vào chi phí vận hành của cửa hàng; theo dõi riêng ở P&L/dòng tiền.' };
+  }
 
   if (includesAny(description, ['trả ncc', 'tra ncc', 'nhà cung cấp', 'nha cung cap', 'công nợ', 'cong no', 'thanh toán ncc', 'thanh toan ncc'])) {
     return { category: 'Trả NCC/công nợ', status: 'Cần đối chiếu', action: 'Đối chiếu với DL_CONG_NO trước khi đưa vào P&L' };
@@ -99,7 +114,7 @@ export function analyzeCashbookRows(rows: DataRow[], relatedCounts: CashbookRela
     const current = byCategory.get(item.category) ?? { amount: 0, count: 0, status: item.status, action: item.action };
     current.amount += item.amount;
     current.count += 1;
-    if (['Cảnh báo', 'Cần CEO duyệt', 'Cần đối chiếu'].includes(item.status)) current.status = item.status;
+    if (['Cảnh báo', 'Cần CEO duyệt', 'Cần đối chiếu', 'Cần theo dõi riêng'].includes(item.status)) current.status = item.status;
     byCategory.set(item.category, current);
   }
 
@@ -124,7 +139,7 @@ export function analyzeCashbookRows(rows: DataRow[], relatedCounts: CashbookRela
   const largeExpenseRows = largeExpenses.map((item) => [
     toIsoDate(pickText(item.row, ['Ngày'])) || '—',
     pickText(item.row, ['Mã tuần', 'Tuần']) || '—',
-    pickText(item.row, ['Chi nhánh']) || '—',
+    pickText(item.row, ['Khu vực', 'Chi nhánh']) || '—',
     item.category,
     getExpenseDescription(item.row),
     formatMoney(item.amount),
@@ -135,10 +150,15 @@ export function analyzeCashbookRows(rows: DataRow[], relatedCounts: CashbookRela
   const unclassifiedOut = byCategory.get('Khác cần phân loại')?.amount ?? 0;
   const nccPaymentOut = byCategory.get('Trả NCC/công nợ')?.amount ?? 0;
   const capexOut = byCategory.get('Đầu tư/Capex')?.amount ?? 0;
-  const operatingOut = totalOut - nccPaymentOut - capexOut - unclassifiedOut;
+  const centralKitchenOut = byCategory.get('Chi Bếp Trung Tâm')?.amount ?? 0;
+  const operatingOut = totalOut - nccPaymentOut - capexOut - unclassifiedOut - centralKitchenOut;
 
   const accountingTaskRows: string[][] = [];
   const issueRows: string[][] = [];
+
+  if (centralKitchenOut > 0) {
+    accountingTaskRows.push(['Cần theo dõi', 'Tách chi Bếp Trung Tâm khỏi chi phí cửa hàng', 'Kế toán', 'Hôm nay', `${formatMoney(centralKitchenOut)} cần theo dõi riêng theo cost center`]);
+  }
 
   if (unclassifiedOut > 0) {
     accountingTaskRows.push(['Cảnh báo', 'Phân loại lại nhóm Khác trong sổ quỹ', 'Kế toán', 'Hôm nay', `${formatMoney(unclassifiedOut)} đang chưa đủ rõ bản chất`]);
@@ -174,6 +194,7 @@ export function analyzeCashbookRows(rows: DataRow[], relatedCounts: CashbookRela
     unclassifiedOut,
     nccPaymentOut,
     capexOut,
+    centralKitchenOut,
     operatingOut: Math.max(0, operatingOut)
   };
 }
