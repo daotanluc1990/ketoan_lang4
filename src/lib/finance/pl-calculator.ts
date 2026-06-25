@@ -1,5 +1,5 @@
 import type { ReportFilter } from '@/lib/reports/report-filters';
-import { pickNumber, type DataRow } from '@/lib/reports/row-normalizers';
+import { normalizeText, pickNumber, pickText, type DataRow } from '@/lib/reports/row-normalizers';
 import { classifyCashExpenses, sumExpenseBucket } from './expense-classifier';
 import { evidenceToRow, formatMoney, formatPercent, makeEvidence, periodLabel } from './formula-evidence';
 import type { DataStatus, PnlCalculationResult } from './finance-types';
@@ -27,6 +27,11 @@ function resultStatus(hasRevenue: boolean, hasCashbook: boolean, hasKnownCogs: b
   return 'missing';
 }
 
+function isCentralKitchenCashbookRow(row: DataRow) {
+  const text = normalizeText(`${pickText(row, ['Khu vực'])} ${pickText(row, ['Chi nhánh'])} ${pickText(row, ['Phân loại P&L'])} ${pickText(row, ['Diễn giải'])} ${pickText(row, ['Ghi chú'])}`);
+  return text.includes('bep trung tam') || text.includes('bếp trung tâm') || text.includes('chi nhanh trung tam') || text.includes('chi nhánh trung tâm') || text.includes('chi bep trung tam') || text.includes('chi bếp trung tâm');
+}
+
 export function calculatePnl(input: PnlCalculationInput): PnlCalculationResult {
   const { storeRevenueRows, appRevenueRows, cashbookRows, lossRows, filter } = input;
   const period = periodLabel(filter?.weekCode, filter?.fromDate, filter?.toDate);
@@ -38,7 +43,10 @@ export function calculatePnl(input: PnlCalculationInput): PnlCalculationResult {
   const lossValue = lossRows.reduce((total, row) => total + Math.abs(pickNumber(row, ['Giá trị chênh lệch'])), 0);
   const revenue = storeSales + appNet;
 
-  const classifiedExpenses = classifyCashExpenses(cashbookRows);
+  const centralKitchenCashbookRows = cashbookRows.filter(isCentralKitchenCashbookRow);
+  const storeCashbookRows = cashbookRows.filter((row) => !isCentralKitchenCashbookRow(row));
+  const centralKitchenExpenses = Math.abs(centralKitchenCashbookRows.filter((row) => pickNumber(row, ['Số tiền', 'Giá trị']) < 0).reduce((total, row) => total + pickNumber(row, ['Số tiền', 'Giá trị']), 0));
+  const classifiedExpenses = classifyCashExpenses(storeCashbookRows);
   const operatingExpenses = sumExpenseBucket(classifiedExpenses, ['operating', 'review']);
   const excludedCashOut = sumExpenseBucket(classifiedExpenses, ['debt_payment', 'capex', 'unclassified']);
   const knownCogs = appCogs + lossValue;
@@ -58,6 +66,7 @@ export function calculatePnl(input: PnlCalculationInput): PnlCalculationResult {
   if (!lossRows.length) limitations.push('Thiếu DL_THAT_THOAT_NVL nên chưa đưa thất thoát NVL vào P&L.');
   if (storeRevenueRows.length && !appRevenueRows.length) limitations.push('Có doanh thu cửa hàng nhưng chưa có giá vốn cửa hàng; lợi nhuận gộp chỉ được tính khi có nguồn giá vốn đủ tin cậy.');
   if (excludedCashOut > 0) limitations.push('Có khoản trả NCC/capex/khác chưa phân loại bị loại khỏi chi phí vận hành cho đến khi kế toán đối chiếu.');
+  if (centralKitchenExpenses > 0) limitations.push('Chi Bếp Trung Tâm được thể hiện riêng, không trộn vào chi phí vận hành của cửa hàng.');
 
   const evidences = [
     makeEvidence({
@@ -90,8 +99,8 @@ export function calculatePnl(input: PnlCalculationInput): PnlCalculationResult {
     makeEvidence({
       metric: 'Chi phí vận hành từ sổ quỹ',
       source: 'DL_SO_QUY',
-      rowCount: cashbookRows.length,
-      formula: 'SUM(phiếu chi vận hành) - loại trừ trả NCC/capex/khác chưa phân loại',
+      rowCount: storeCashbookRows.length,
+      formula: 'SUM(phiếu chi vận hành cửa hàng) - loại trừ trả NCC/capex/khác chưa phân loại; không trộn chi Bếp Trung Tâm',
       period,
       status: hasCashbook ? 'needs_review' : 'missing',
       note: hasCashbook ? 'Cần kế toán rà lại nhóm chi chưa rõ bản chất.' : 'Cần import sổ quỹ.'
@@ -100,7 +109,7 @@ export function calculatePnl(input: PnlCalculationInput): PnlCalculationResult {
       metric: 'Lợi nhuận ròng tạm',
       source: 'Bộ máy P&L',
       rowCount: storeRevenueRows.length + appRevenueRows.length + cashbookRows.length + lossRows.length,
-      formula: 'Doanh thu - Giá vốn biết được - Chi phí vận hành tạm',
+      formula: 'Doanh thu - Giá vốn biết được - Chi phí vận hành cửa hàng tạm',
       period,
       status: netProfit === null ? 'missing' : hasKnownCogs ? 'partial' : 'missing',
       note: netProfit === null ? 'Không tính nếu thiếu doanh thu/giá vốn/chi phí.' : 'Chỉ là tạm nếu còn thiếu giá vốn cửa hàng hoặc khoản chưa phân loại.'
@@ -113,7 +122,8 @@ export function calculatePnl(input: PnlCalculationInput): PnlCalculationResult {
     ['Doanh thu', 'Tổng doanh thu đủ nguồn hiện có', hasRevenue ? formatMoney(revenue) : 'Chưa đủ dữ liệu', '—', '—', '—', hasRevenue ? (storeRevenueRows.length && appRevenueRows.length ? 'Đủ dữ liệu' : 'Dữ liệu một phần') : 'Chưa đủ dữ liệu'],
     ['Giá vốn', 'Giá vốn app', appRevenueRows.length ? formatMoney(appCogs) : 'Chưa đủ dữ liệu', '—', '—', revenue ? formatPercent(appCogs / revenue) : '—', appRevenueRows.length ? 'Cần kiểm' : 'Chưa đủ dữ liệu'],
     ['Giá vốn', 'Thất thoát NVL quy tiền', lossRows.length ? formatMoney(lossValue) : 'Chưa đủ dữ liệu', '—', '—', revenue ? formatPercent(lossValue / revenue) : '—', lossRows.length ? 'Cảnh báo' : 'Chưa đủ dữ liệu'],
-    ['Chi phí', 'Chi phí vận hành tạm từ sổ quỹ', hasCashbook ? formatMoney(operatingExpenses) : 'Chưa đủ dữ liệu', '—', '—', revenue ? formatPercent(operatingExpenses / revenue) : '—', hasCashbook ? 'Cần kiểm' : 'Chưa đủ dữ liệu'],
+    ['Chi phí', 'Chi phí vận hành cửa hàng từ sổ quỹ', hasCashbook ? formatMoney(operatingExpenses) : 'Chưa đủ dữ liệu', '—', '—', revenue ? formatPercent(operatingExpenses / revenue) : '—', hasCashbook ? 'Cần kiểm' : 'Chưa đủ dữ liệu'],
+    ['Chi phí', 'Chi Bếp Trung Tâm theo dõi riêng', centralKitchenExpenses ? formatMoney(centralKitchenExpenses) : 'Không có', '—', '—', '—', centralKitchenExpenses ? 'Theo dõi riêng' : 'Không có'],
     ['Loại trừ', 'Không đưa thẳng vào P&L: trả NCC/capex/khác', hasCashbook ? formatMoney(excludedCashOut) : 'Chưa đủ dữ liệu', '—', '—', '—', excludedCashOut ? 'Cần đối chiếu' : hasCashbook ? 'Tốt' : 'Chưa đủ dữ liệu'],
     ['Lợi nhuận', 'Lợi nhuận gộp tạm', grossProfit !== null ? formatMoney(grossProfit) : 'Chưa đủ dữ liệu', '—', '—', cogsPercent !== null ? formatPercent(cogsPercent) : '—', grossProfit !== null ? 'Dữ liệu một phần' : 'Chưa đủ dữ liệu'],
     ['Lợi nhuận', 'Lợi nhuận ròng tạm', netProfit !== null ? formatMoney(netProfit) : 'Chưa đủ dữ liệu', '—', '—', revenue && netProfit !== null ? formatPercent(netProfit / revenue) : '—', netProfit !== null ? 'Dữ liệu một phần' : 'Chưa đủ dữ liệu'],
