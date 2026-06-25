@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 const pnlTrend: Record<string, string> = {
   'Tổng doanh thu': 'Nguồn hiện có',
   'Doanh thu cửa hàng': 'Offline + MoMo',
-  'Doanh thu app net': 'Sau phí app',
+  'Doanh thu app net': 'Kênh app',
   'Tiền ra': 'Theo sổ quỹ',
   'Chi cần phân loại': 'Kế toán rà',
   'Thất thoát quy tiền': 'Theo NVL'
@@ -49,7 +49,7 @@ export default async function PlTuanPage({ searchParams }: { searchParams?: Page
 
       <section className="grid gap-2.5 xl:grid-cols-2">
         <ChartCard title="Doanh thu theo nguồn" items={report.revenueByChannel.map((item) => ({ label: item.channel, value: item.value, caption: item.revenue }))} />
-        <ChartCard title="Tỷ lệ chính" items={[{ label: 'COGS tạm tính', value: report.totals.cogsPercent * 100, caption: `${(report.totals.cogsPercent * 100).toFixed(1)}%` }, { label: 'App fee%', value: report.totals.appFeePercent * 100, caption: `${(report.totals.appFeePercent * 100).toFixed(1)}%` }]} />
+        <ChartCard title="Tỷ lệ cần theo dõi" items={[{ label: 'COGS tạm tính', value: report.totals.cogsPercent * 100, caption: `${(report.totals.cogsPercent * 100).toFixed(1)}%` }, { label: 'Thất thoát', value: report.totals.lossValue, caption: report.executiveKpis.find((kpi) => kpi.label === 'Thất thoát quy tiền')?.value ?? '—' }]} />
       </section>
     </div>
   );
