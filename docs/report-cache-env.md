@@ -1,21 +1,50 @@
-# Report Cache / Snapshot Environment
+# Report Cache / Snapshot
 
-Để cache báo cáo bền trên Vercel, cấu hình một trong hai nhóm biến môi trường sau.
+App hiện dùng memory snapshot cache mặc định. Không cần cấu hình thêm Vercel KV, Upstash Redis, hoặc tạo sheet lịch sử snapshot để app chạy nhanh hơn bản cũ.
 
-## Vercel KV
+## Mặc định đang dùng
 
-- `KV_REST_API_URL`
-- `KV_REST_API_TOKEN`
+```text
+Memory cache trong app
+TTL mặc định: 900 giây
+```
 
-## Upstash Redis
+Ý nghĩa:
 
-- `UPSTASH_REDIS_REST_URL`
-- `UPSTASH_REDIS_REST_TOKEN`
+- Không cần thêm biến môi trường.
+- Không cần tạo thêm sheet trong Google Sheet.
+- Nút `Làm mới báo cáo` sẽ làm ấm lại cache trong phiên server hiện tại.
+- Nếu Vercel cold start hoặc đổi server/lambda, cache có thể mất và app sẽ đọc Google Sheet lại lần đầu.
+
+## Tùy chọn sau này: External cache
+
+Chỉ cấu hình khi cần cache bền hơn qua nhiều Vercel instance.
+
+### Vercel KV
+
+```text
+KV_REST_API_URL
+KV_REST_API_TOKEN
+```
+
+### Upstash Redis
+
+```text
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+```
+
+Nếu không cấu hình các biến trên, app vẫn chạy bình thường bằng memory cache.
 
 ## Cache TTL
 
-- `REPORT_SNAPSHOT_TTL_SECONDS`
-- Mặc định trong code: `900` giây.
+Có thể chỉnh bằng biến tùy chọn:
+
+```text
+REPORT_SNAPSHOT_TTL_SECONDS
+```
+
+Nếu không cấu hình, app dùng mặc định `900` giây.
 
 ## API làm mới cache
 
@@ -27,18 +56,8 @@ POST /api/reports/prewarm
 
 Endpoint này yêu cầu đăng nhập role `CEO` hoặc `Kế toán`.
 
-## Lưu snapshot dài hạn
+## Snapshot history
 
-Khi bấm làm mới cache, app sẽ cố ghi thêm một bản vào sheet:
+Không còn bắt buộc tạo sheet `REPORT_SNAPSHOT_HISTORY`.
 
-```text
-REPORT_SNAPSHOT_HISTORY
-```
-
-Sheet này cần có header:
-
-```text
-Thời gian | Tên báo cáo | Nội dung JSON
-```
-
-Nếu sheet chưa tồn tại, app vẫn chạy bình thường nhưng trường `archived` trong kết quả refresh sẽ là `false`.
+Nếu sau này muốn lưu lịch sử snapshot để truy vết kế toán, cần thiết kế lại như một tính năng riêng, có phân quyền, dung lượng lưu, thời gian lưu và cách đọc lại lịch sử.
