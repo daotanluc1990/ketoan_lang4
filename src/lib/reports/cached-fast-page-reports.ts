@@ -1,5 +1,6 @@
 import { getOrSetReportCache, hasExternalReportCache, setReportCache, stableCacheKey } from '@/lib/cache/report-cache';
 import type { ReportFilter } from './report-filters';
+import { saveReportArchive } from './report-archive';
 import {
   buildFastBalanceReport,
   buildFastCashflowReport,
@@ -66,10 +67,13 @@ export async function refreshReportSnapshots(input: ReportInput = {}) {
     setReportCache(cacheKey('workbench', input), SNAPSHOT_TTL_SECONDS, workbench)
   ]);
 
+  const archived = await saveReportArchive('report-bundle', { input, overview, pnl, cashflow, balance, loss, workbench });
+
   return {
     ok: true,
     cache: hasExternalReportCache() ? 'external' : 'memory',
     ttlSeconds: SNAPSHOT_TTL_SECONDS,
+    archived,
     refreshed: ['filter-options', 'overview', 'pnl', 'cashflow', 'balance', 'loss', 'workbench'],
     createdAt: new Date().toISOString()
   };
