@@ -5,11 +5,11 @@ export type NavigationItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  group: 'CEO' | 'Báo cáo quản trị' | 'Kế toán' | 'Hệ thống';
+  group: 'Tổng quan' | 'Báo cáo quản trị' | 'Kế toán' | 'Hệ thống';
 };
 
 export const navigationItems: NavigationItem[] = [
-  { href: '/tong-quan', label: 'CEO Dashboard', icon: Home, group: 'CEO' },
+  { href: '/tong-quan', label: 'Tổng quan kế toán', icon: Home, group: 'Tổng quan' },
   { href: '/pl-tuan', label: 'P&L Tuần', icon: BarChart3, group: 'Báo cáo quản trị' },
   { href: '/dong-tien', label: 'Dòng tiền Tuần', icon: DollarSign, group: 'Báo cáo quản trị' },
   { href: '/can-doi', label: 'Cân đối rút gọn', icon: Scale, group: 'Báo cáo quản trị' },
@@ -20,4 +20,4 @@ export const navigationItems: NavigationItem[] = [
   { href: '/cai-dat-bot', label: 'Cài đặt & Bot báo cáo', icon: Bot, group: 'Hệ thống' }
 ];
 
-export const navigationGroups = ['CEO', 'Báo cáo quản trị', 'Kế toán', 'Hệ thống'] as const;
+export const navigationGroups = ['Tổng quan', 'Báo cáo quản trị', 'Kế toán', 'Hệ thống'] as const;
