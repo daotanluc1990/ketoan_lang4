@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth/require-auth';
 import { refreshReportSnapshots } from '@/lib/reports/cached-fast-page-reports';
 
 export const runtime = 'nodejs';
 
-function authorized(request: NextRequest) {
-  const token = process.env.REPORT_PREWARM_TOKEN;
-  if (!token) return false;
-  return request.headers.get('x-report-prewarm-token') === token;
-}
-
 export async function POST(request: NextRequest) {
-  if (!authorized(request)) {
-    return NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 });
-  }
+  const auth = await requireAuth(request, ['CEO', 'Kế toán']);
+  if (!auth.ok) return auth.response;
   try {
     const result = await refreshReportSnapshots({});
     return NextResponse.json(result);
