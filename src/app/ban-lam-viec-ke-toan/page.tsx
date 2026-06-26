@@ -12,7 +12,7 @@ import { resolvePageSearchParams, type PageSearchParams } from "@/lib/reports/pa
 import { getDataStore } from "@/lib/data-store";
 import { SHEET_NAMES } from "@/lib/google-sheets/sheet-names";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 async function readHistory() {
   try {
