@@ -5,26 +5,15 @@ import { usePathname, useRouter } from 'next/navigation';
 import type { FilterOptions, ReportFilter } from '@/lib/reports/report-filters';
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="min-w-0"><span className="mb-0.5 block text-[9px] font-extrabold uppercase tracking-wide text-black/40">{label}</span>{children}</label>;
+  return <label className="min-w-0"><span className="mb-0.5 block text-[9px] font-black uppercase tracking-wide text-slate-500">{label}</span>{children}</label>;
 }
 
-const inputClass = 'h-7 w-full min-w-0 rounded-md border border-black/10 bg-white px-2 text-[11px] font-semibold text-lang-brown shadow-sm outline-none focus:border-lang-red/60 focus:ring-2 focus:ring-lang-red/10';
+const inputClass = 'h-7 w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-bold text-slate-800 shadow-sm outline-none focus:border-red-700/50 focus:ring-2 focus:ring-red-700/10';
 const allValue = 'all';
 
 type UiFilter = Required<Pick<ReportFilter, 'fromDate' | 'toDate' | 'weekCode' | 'branch' | 'channel' | 'costGroup' | 'dataStatus' | 'alertStatus' | 'importedBy'>> & { source: string };
 
-const emptyFilter: UiFilter = {
-  fromDate: '',
-  toDate: '',
-  weekCode: '',
-  branch: '',
-  channel: '',
-  costGroup: '',
-  source: allValue,
-  dataStatus: '',
-  alertStatus: '',
-  importedBy: ''
-};
+const emptyFilter: UiFilter = { fromDate: '', toDate: '', weekCode: '', branch: '', channel: '', costGroup: '', source: allValue, dataStatus: '', alertStatus: '', importedBy: '' };
 
 function readFilterFromWindow(): UiFilter {
   if (typeof window === 'undefined') return emptyFilter;
@@ -44,12 +33,7 @@ function readFilterFromWindow(): UiFilter {
 }
 
 function OptionList({ values, allLabel }: { values: string[]; allLabel: string }) {
-  return (
-    <>
-      <option value="">{allLabel}</option>
-      {values.map((value) => <option key={value} value={value}>{value}</option>)}
-    </>
-  );
+  return <><option value="">{allLabel}</option>{values.map((value) => <option key={value} value={value}>{value}</option>)}</>;
 }
 
 export function GlobalFilterBar() {
@@ -66,108 +50,57 @@ export function GlobalFilterBar() {
       .then(async (response) => {
         const payload = await response.json().catch(() => null);
         if (!active) return;
-        if (!response.ok || !payload?.ok) {
-          setError(payload?.message ?? 'Không đọc được bộ lọc từ dữ liệu thật.');
-          return;
-        }
+        if (!response.ok || !payload?.ok) { setError(payload?.message ?? 'Không đọc được bộ lọc.'); return; }
         setOptions(payload.options);
         setError('');
       })
-      .catch(() => {
-        if (active) setError('Không đọc được bộ lọc từ dữ liệu thật.');
-      })
-      .finally(() => {
-        if (active) setLoadingOptions(false);
-      });
+      .catch(() => { if (active) setError('Không đọc được bộ lọc.'); })
+      .finally(() => { if (active) setLoadingOptions(false); });
     return () => { active = false; };
   }, []);
 
   const activeCount = useMemo(() => Object.entries(filter).filter(([key, value]) => value && !(key === 'source' && value === allValue)).length, [filter]);
   const advancedActive = Boolean(filter.source !== allValue || filter.channel || filter.costGroup || filter.dataStatus || filter.alertStatus || filter.importedBy);
+  const dateLabel = filter.fromDate || filter.toDate ? `${filter.fromDate || '—'} → ${filter.toDate || '—'}` : options?.dateRange.min || options?.dateRange.max ? `${options.dateRange.min ?? '—'} → ${options.dateRange.max ?? '—'}` : 'Chưa có khoảng ngày';
 
   const update = (key: keyof UiFilter, value: string) => setFilter((current) => ({ ...current, [key]: value }));
-
   const applyFilter = () => {
     const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     for (const [key, value] of Object.entries(filter)) {
-      if (value && !(key === 'source' && value === allValue)) params.set(key, value);
-      else params.delete(key);
+      if (value && !(key === 'source' && value === allValue)) params.set(key, value); else params.delete(key);
     }
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname);
     router.refresh();
   };
-
-  const clearFilter = () => {
-    setFilter(emptyFilter);
-    router.push(pathname);
-    router.refresh();
-  };
+  const clearFilter = () => { setFilter(emptyFilter); router.push(pathname); router.refresh(); };
 
   return (
-    <section className="sticky top-11 z-10 border-b border-black/5 bg-lang-cream/95 backdrop-blur">
-      <div className="grid w-full gap-1.5 px-3 py-1.5 sm:px-4 lg:px-4">
-        <div className="grid grid-cols-2 gap-1.5 md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
-          <Field label="Chi nhánh">
-            <select className={inputClass} aria-label="Chi nhánh" value={filter.branch} onChange={(event) => update('branch', event.target.value)}>
-              <OptionList values={options?.branches ?? []} allLabel="Tất cả chi nhánh" />
-            </select>
-          </Field>
-          <Field label="Kỳ báo cáo">
-            <select className={inputClass} aria-label="Mã tuần" value={filter.weekCode} onChange={(event) => update('weekCode', event.target.value)}>
-              <OptionList values={options?.weekCodes ?? []} allLabel="Tất cả tuần" />
-            </select>
-          </Field>
-          <Field label="Từ ngày"><input className={inputClass} type="date" value={filter.fromDate} min={options?.dateRange.min} max={options?.dateRange.max} aria-label="Từ ngày" onChange={(event) => update('fromDate', event.target.value)} /></Field>
-          <Field label="Đến ngày"><input className={inputClass} type="date" value={filter.toDate} min={options?.dateRange.min} max={options?.dateRange.max} aria-label="Đến ngày" onChange={(event) => update('toDate', event.target.value)} /></Field>
-          <div className="flex items-end gap-1.5">
-            <button className="h-7 rounded-md bg-lang-red px-2.5 text-[11px] font-bold text-white shadow-sm hover:bg-lang-red/90" type="button" onClick={applyFilter}>Làm mới</button>
-            <button className="h-7 rounded-md bg-white px-2.5 text-[11px] font-bold text-lang-brown ring-1 ring-black/10 hover:bg-lang-cream" type="button" onClick={clearFilter}>Xóa</button>
+    <section className="sticky top-11 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="w-full px-3 py-1 sm:px-4 lg:px-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-black text-slate-600">
+            <span className="text-slate-900">Bộ lọc</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5">{loadingOptions ? 'đang đọc' : `${activeCount} bộ lọc`}</span>
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-amber-800">{dateLabel}</span>
+            {error ? <span className="rounded-full bg-red-50 px-2 py-0.5 text-red-700">{error}</span> : null}
           </div>
-        </div>
-
-        <details className="group" open={advancedActive}>
-          <summary className="cursor-pointer list-none text-[11px] font-bold text-black/50 hover:text-lang-brown">
-            Bộ lọc nâng cao · đang bật {activeCount}
-          </summary>
-          <div className="mt-1.5 grid grid-cols-2 gap-1.5 md:grid-cols-6">
-            <Field label="Nguồn dữ liệu">
-              <select className={inputClass} aria-label="Nguồn dữ liệu" value={filter.source} onChange={(event) => update('source', event.target.value)}>
-                {(options?.sources ?? [{ key: allValue, label: 'Tất cả nguồn' }]).map((source) => <option key={source.key} value={source.key}>{source.label}</option>)}
-              </select>
-            </Field>
-            <Field label="Kênh bán">
-              <select className={inputClass} aria-label="Kênh hoặc nhóm dữ liệu" value={filter.channel} onChange={(event) => update('channel', event.target.value)}>
-                <OptionList values={options?.channels ?? []} allLabel="Tất cả kênh" />
-              </select>
-            </Field>
-            <Field label="Nhóm chi phí">
-              <select className={inputClass} aria-label="Nhóm chi phí" value={filter.costGroup} onChange={(event) => update('costGroup', event.target.value)}>
-                <OptionList values={options?.channels ?? []} allLabel="Tất cả nhóm" />
-              </select>
-            </Field>
-            <Field label="Dữ liệu">
-              <select className={inputClass} aria-label="Trạng thái dữ liệu" value={filter.dataStatus} onChange={(event) => update('dataStatus', event.target.value)}>
-                <OptionList values={options?.dataStatuses ?? []} allLabel="Tất cả" />
-              </select>
-            </Field>
-            <Field label="Cảnh báo">
-              <select className={inputClass} aria-label="Trạng thái cảnh báo" value={filter.alertStatus} onChange={(event) => update('alertStatus', event.target.value)}>
-                <OptionList values={options?.alertStatuses ?? []} allLabel="Tất cả" />
-              </select>
-            </Field>
-            <Field label="Người nhập">
-              <select className={inputClass} aria-label="Người nhập liệu" value={filter.importedBy} onChange={(event) => update('importedBy', event.target.value)}>
-                <OptionList values={options?.importedBy ?? []} allLabel="Tất cả" />
-              </select>
-            </Field>
-          </div>
-        </details>
-
-        <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold text-black/45">
-          <span>{loadingOptions ? 'Đang đọc bộ lọc...' : `Bộ lọc: ${activeCount}`}</span>
-          {options?.dateRange.min || options?.dateRange.max ? <span>{options.dateRange.min ?? '—'} → {options.dateRange.max ?? '—'}</span> : null}
-          {error ? <span className="text-red-700">{error}</span> : null}
+          <details className="group" open={advancedActive}>
+            <summary className="cursor-pointer list-none rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-black text-slate-700 hover:bg-slate-50">Mở bộ lọc</summary>
+            <div className="mt-1.5 grid min-w-[calc(100vw-1.5rem)] grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm md:grid-cols-4 xl:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+              <Field label="Chi nhánh"><select className={inputClass} value={filter.branch} onChange={(e) => update('branch', e.target.value)}><OptionList values={options?.branches ?? []} allLabel="Tất cả chi nhánh" /></select></Field>
+              <Field label="Kỳ báo cáo"><select className={inputClass} value={filter.weekCode} onChange={(e) => update('weekCode', e.target.value)}><OptionList values={options?.weekCodes ?? []} allLabel="Tất cả tuần" /></select></Field>
+              <Field label="Từ ngày"><input className={inputClass} type="date" value={filter.fromDate} min={options?.dateRange.min} max={options?.dateRange.max} onChange={(e) => update('fromDate', e.target.value)} /></Field>
+              <Field label="Đến ngày"><input className={inputClass} type="date" value={filter.toDate} min={options?.dateRange.min} max={options?.dateRange.max} onChange={(e) => update('toDate', e.target.value)} /></Field>
+              <div className="flex items-end gap-1.5"><button className="h-7 rounded-md bg-red-700 px-2.5 text-[11px] font-black text-white" type="button" onClick={applyFilter}>Làm mới</button><button className="h-7 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-black text-slate-700" type="button" onClick={clearFilter}>Xóa</button></div>
+              <Field label="Nguồn"><select className={inputClass} value={filter.source} onChange={(e) => update('source', e.target.value)}>{(options?.sources ?? [{ key: allValue, label: 'Tất cả nguồn' }]).map((source) => <option key={source.key} value={source.key}>{source.label}</option>)}</select></Field>
+              <Field label="Kênh"><select className={inputClass} value={filter.channel} onChange={(e) => update('channel', e.target.value)}><OptionList values={options?.channels ?? []} allLabel="Tất cả kênh" /></select></Field>
+              <Field label="Nhóm chi"><select className={inputClass} value={filter.costGroup} onChange={(e) => update('costGroup', e.target.value)}><OptionList values={options?.channels ?? []} allLabel="Tất cả nhóm" /></select></Field>
+              <Field label="Dữ liệu"><select className={inputClass} value={filter.dataStatus} onChange={(e) => update('dataStatus', e.target.value)}><OptionList values={options?.dataStatuses ?? []} allLabel="Tất cả" /></select></Field>
+              <Field label="Cảnh báo"><select className={inputClass} value={filter.alertStatus} onChange={(e) => update('alertStatus', e.target.value)}><OptionList values={options?.alertStatuses ?? []} allLabel="Tất cả" /></select></Field>
+              <Field label="Người nhập"><select className={inputClass} value={filter.importedBy} onChange={(e) => update('importedBy', e.target.value)}><OptionList values={options?.importedBy ?? []} allLabel="Tất cả" /></select></Field>
+            </div>
+          </details>
         </div>
       </div>
     </section>
