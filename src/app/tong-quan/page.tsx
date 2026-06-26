@@ -10,14 +10,14 @@ export const revalidate = 300;
 
 const kpiCopy: Record<string, { hint: string; icon: string }> = {
   'Tổng doanh thu': { hint: 'Cửa hàng + App', icon: '₫' },
-  'Doanh thu cửa hàng': { hint: 'Offline + MoMo', icon: 'CH' },
-  'Doanh thu app net': { hint: 'Kênh app', icon: 'APP' },
-  'Tiền vào': { hint: 'Đã ghi nhận thu', icon: 'IN' },
-  'Tiền ra': { hint: 'Đã ghi nhận chi', icon: 'OUT' },
-  'Dòng tiền tạm': { hint: 'Thu - chi', icon: 'CF' },
+  'Doanh thu cửa hàng': { hint: 'Offline + MoMo', icon: '🏪' },
+  'Doanh thu app net': { hint: 'Kênh app', icon: '📱' },
+  'Tiền vào': { hint: 'Đã ghi nhận thu', icon: '↓' },
+  'Tiền ra': { hint: 'Đã ghi nhận chi', icon: '↑' },
+  'Dòng tiền tạm': { hint: 'Thu - chi', icon: '〽' },
   'Chi cần phân loại': { hint: 'Kế toán rà', icon: '!' },
-  'Tồn kho': { hint: 'Theo tồn kho', icon: 'KHO' },
-  'Thất thoát quy tiền': { hint: 'Theo NVL', icon: 'TT' }
+  'Tồn kho': { hint: 'Theo tồn kho', icon: '📦' },
+  'Thất thoát quy tiền': { hint: 'Theo NVL', icon: '⚠' }
 };
 
 function sourceTone(status: string) {
@@ -37,8 +37,9 @@ export default async function TongQuanPage({ searchParams }: { searchParams?: Pa
   return (
     <div className="space-y-4">
       <ErpPageHeader
+        eyebrow="Cơm Tấm Làng · ERP Mini"
         title="Tổng quan kế toán"
-        description="Rà nhanh dữ liệu, tiền, kho, thất thoát và việc cần xử lý. Đây là màn pilot UI, chỉ đổi cách trình bày dữ liệu hiện có."
+        description="Rà nhanh dữ liệu, tiền, kho, thất thoát và việc cần xử lý."
         status={status}
         meta={['Tuần/Kỳ theo bộ lọc', 'Nguồn: Google Sheet', `Cache: snapshot ${report.hasRealData ? 'đang dùng' : 'chờ dữ liệu'}`]}
       />
