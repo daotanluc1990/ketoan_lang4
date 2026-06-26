@@ -1,8 +1,8 @@
-import { PageHeader } from '@/components/layout/PageHeader';
-import { MetricCard } from '@/components/report/MetricCard';
-import { ReportTable } from '@/components/report/ReportTable';
-import { Card, CardTitle } from '@/components/ui/Card';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { ErpDataTable } from '@/components/erp/ErpDataTable';
+import { ErpInsightPanel } from '@/components/erp/ErpInsightPanel';
+import { ErpKpiCard } from '@/components/erp/ErpKpiCard';
+import { ErpPageHeader } from '@/components/erp/ErpPageHeader';
+import { ErpStatusStrip } from '@/components/erp/ErpStatusStrip';
 import { buildSnapshotBalanceReport } from '@/lib/reports/cached-fast-page-reports';
 import { resolvePageSearchParams, type PageSearchParams } from '@/lib/reports/page-search-params';
 
@@ -11,6 +11,10 @@ export const revalidate = 300;
 export default async function CanDoiPage({ searchParams }: { searchParams?: PageSearchParams }) {
   const report = await buildSnapshotBalanceReport(await resolvePageSearchParams(searchParams));
   const hasBalanceData = report.sourceCounts.cashbook > 0 || report.sourceCounts.inventory > 0 || report.sourceCounts.lossRows > 0;
+  const status = hasBalanceData ? 'Cần đối chiếu' : 'Chưa đủ dữ liệu';
+  const cashKpi = report.executiveKpis.find((kpi) => kpi.label === 'Dòng tiền tạm')?.value ?? '—';
+  const inventoryKpi = report.executiveKpis.find((kpi) => kpi.label === 'Tồn kho')?.value ?? '—';
+  const lossKpi = report.executiveKpis.find((kpi) => kpi.label === 'Thất thoát quy tiền')?.value ?? '—';
   const warningRows = [
     ['Tồn âm', `${report.totals.negativeStockCount} mặt hàng`, 'Rà nhập/xuất/kiểm kê'],
     ['Nguồn thiếu', report.missingSources.length ? report.missingSources.join(', ') : 'Không thiếu', 'Bổ sung trước khi chốt'],
@@ -18,20 +22,68 @@ export default async function CanDoiPage({ searchParams }: { searchParams?: Page
   ];
 
   return (
-    <div className="space-y-2.5">
-      <PageHeader title="Cân đối rút gọn" description="Tiền, tồn kho, thất thoát và nguồn còn thiếu." status={hasBalanceData ? 'Cần đối chiếu' : 'Chưa đủ dữ liệu'} />
-      {!hasBalanceData ? <EmptyState title="Chưa đủ dữ liệu cân đối" description="Cần import sổ quỹ, tồn kho và thất thoát." /> : null}
-      <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Dòng tiền tạm" value={report.executiveKpis.find((kpi) => kpi.label === 'Dòng tiền tạm')?.value ?? '—'} status={report.totals.cashEnding < 0 ? 'danger' : hasBalanceData ? 'good' : 'neutral'} trend="Từ sổ quỹ" compact />
-        <MetricCard label="Tồn kho" value={report.executiveKpis.find((kpi) => kpi.label === 'Tồn kho')?.value ?? '—'} status={report.totals.negativeStockCount ? 'warning' : hasBalanceData ? 'good' : 'neutral'} trend={`${report.totals.negativeStockCount} tồn âm`} compact />
-        <MetricCard label="Thất thoát" value={report.executiveKpis.find((kpi) => kpi.label === 'Thất thoát quy tiền')?.value ?? '—'} status={report.totals.lossValue ? 'warning' : 'neutral'} trend="Theo NVL" compact />
-        <MetricCard label="Nguồn thiếu" value={`${report.missingSources.length}`} status={report.missingSources.length ? 'warning' : 'good'} trend={report.missingSources.length ? 'Cần bổ sung' : 'Đủ nguồn'} compact />
+    <div className="space-y-4">
+      <ErpPageHeader
+        eyebrow="Cơm Tấm Làng · ERP Mini"
+        title="Cân đối rút gọn"
+        description="Đọc nhanh tiền, tồn kho, thất thoát và nguồn còn thiếu. Đây là cân đối quản trị tạm, chưa phải báo cáo tài chính pháp lý."
+        status={status}
+        meta={['Tiền', 'Tồn kho', 'Thất thoát', 'Nguồn còn thiếu']}
+      />
+
+      {!hasBalanceData ? (
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] font-bold text-amber-900">
+          Chưa đủ dữ liệu cân đối. Cần import sổ quỹ, tồn kho và thất thoát trước khi kết luận.
+        </section>
+      ) : null}
+
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <ErpKpiCard label="Dòng tiền tạm" value={cashKpi} status={report.totals.cashEnding < 0 ? 'danger' : hasBalanceData ? 'good' : 'neutral'} trend="Từ sổ quỹ" icon="CF" />
+        <ErpKpiCard label="Tồn kho" value={inventoryKpi} status={report.totals.negativeStockCount ? 'warning' : hasBalanceData ? 'good' : 'neutral'} trend={`${report.totals.negativeStockCount} tồn âm`} icon="KHO" />
+        <ErpKpiCard label="Thất thoát" value={lossKpi} status={report.totals.lossValue ? 'warning' : 'neutral'} trend="Theo NVL" icon="TT" />
+        <ErpKpiCard label="Nguồn thiếu" value={`${report.missingSources.length}`} status={report.missingSources.length ? 'warning' : 'good'} trend={report.missingSources.length ? 'Cần bổ sung' : 'Đủ nguồn'} icon="DATA" />
       </section>
-      <section className="grid gap-2 xl:grid-cols-[minmax(0,2fr)_minmax(260px,0.8fr)]">
-        <Card><CardTitle>Bảng cân đối rút gọn</CardTitle><div className="mt-2"><ReportTable headers={['Nhóm', 'Chỉ số', 'Số tiền', 'Tuần trước', 'Chênh lệch', 'Trạng thái', 'Ghi chú']} rows={report.balanceRows} maxHeight="max-h-[390px]" /></div></Card>
-        <Card><CardTitle>Cảnh báo cần xem</CardTitle><div className="mt-2"><ReportTable headers={['Mục', 'Giá trị', 'Hành động']} rows={warningRows} maxHeight="max-h-[220px]" /></div></Card>
+
+      <ErpStatusStrip
+        items={[
+          { label: 'Sổ quỹ', value: report.sourceCounts.cashbook, tone: report.sourceCounts.cashbook ? 'good' : 'warning', icon: 'SQ' },
+          { label: 'Tồn kho', value: report.sourceCounts.inventory, tone: report.sourceCounts.inventory ? 'good' : 'warning', icon: 'KHO' },
+          { label: 'Thất thoát', value: report.sourceCounts.lossRows, tone: report.sourceCounts.lossRows ? 'warning' : 'neutral', icon: 'TT' },
+          { label: 'Tồn âm', value: report.totals.negativeStockCount, tone: report.totals.negativeStockCount ? 'warning' : 'good', icon: 'ÂM' },
+          { label: 'Nguồn thiếu', value: report.missingSources.length, tone: report.missingSources.length ? 'warning' : 'good', icon: 'MISS' },
+          { label: 'Trạng thái', value: status, tone: hasBalanceData ? 'warning' : 'neutral', icon: 'CHK' }
+        ]}
+      />
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <ErpDataTable
+          title="Bảng cân đối rút gọn"
+          headers={['Nhóm', 'Chỉ số', 'Số tiền', 'Tuần trước', 'Chênh lệch', 'Trạng thái', 'Ghi chú']}
+          rows={report.balanceRows}
+          maxHeight="max-h-[430px]"
+        />
+        <div className="space-y-4">
+          <ErpInsightPanel
+            title="Cảnh báo cần xem"
+            rows={warningRows.map((row) => ({ label: row[0], value: row[1], caption: row[2], tone: row[0] === 'Nguồn thiếu' && report.missingSources.length ? 'warning' : row[0] === 'Tồn âm' && report.totals.negativeStockCount ? 'warning' : 'neutral' }))}
+          />
+          <ErpInsightPanel
+            title="Đọc nhanh cân đối"
+            rows={[
+              { label: 'Tiền', value: cashKpi, caption: 'Từ sổ quỹ hiện có', tone: report.totals.cashEnding < 0 ? 'danger' : 'good' },
+              { label: 'Hàng tồn', value: inventoryKpi, caption: 'Có thể chưa đủ nếu thiếu kiểm kê', tone: report.totals.negativeStockCount ? 'warning' : 'good' },
+              { label: 'Thất thoát', value: lossKpi, caption: 'Cần tách khỏi hao hụt/hủy', tone: report.totals.lossValue ? 'warning' : 'neutral' }
+            ]}
+          />
+        </div>
       </section>
-      <Card><CardTitle>Giới hạn cần kế toán rà</CardTitle><div className="mt-2"><ReportTable headers={['Nhóm', 'Vấn đề', 'Ảnh hưởng', 'Hành động']} rows={report.financeLimitationRows} maxHeight="max-h-[260px]" /></div></Card>
+
+      <ErpDataTable
+        title="Giới hạn cần kế toán rà"
+        headers={['Nhóm', 'Vấn đề', 'Ảnh hưởng', 'Hành động']}
+        rows={report.financeLimitationRows}
+        maxHeight="max-h-[300px]"
+      />
     </div>
   );
 }
