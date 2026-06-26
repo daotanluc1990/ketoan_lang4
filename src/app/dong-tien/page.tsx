@@ -17,7 +17,7 @@ export default async function DongTienPage({ searchParams }: { searchParams?: Pa
 
   return (
     <div className="space-y-2.5">
-      <PageHeader title="Dòng tiền Tuần" description="Tiền vào, tiền ra, dòng tiền tạm và khoản cần rà." status={hasCashbook ? 'Tốt' : 'Chưa đủ dữ liệu'} />
+      <PageHeader title="Dòng tiền Tuần" description="Tiền vào, tiền ra, chi Chi nhánh/BTT và khoản cần rà." status={hasCashbook ? 'Tốt' : 'Chưa đủ dữ liệu'} />
       <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Tiền vào" value={moneyIn?.value ?? '—'} status={hasCashbook ? 'good' : 'neutral'} trend="Đã ghi nhận thu" compact />
         <MetricCard label="Tiền ra" value={moneyOut?.value ?? '—'} status={hasCashbook ? 'warning' : 'neutral'} trend="Đã ghi nhận chi" compact />
@@ -30,13 +30,13 @@ export default async function DongTienPage({ searchParams }: { searchParams?: Pa
           <div className="mt-2"><ReportTable headers={['Nhóm', 'Chỉ số', 'Số tiền', 'Tuần trước', 'Chênh lệch', 'Đối chiếu', 'Ghi chú']} rows={report.cashflowRows} maxHeight="max-h-[340px]" /></div>
         </Card>
         <Card>
-          <CardTitle>Chi theo nhóm</CardTitle>
-          <div className="mt-2"><ReportTable headers={['Nguồn', 'Nhóm chi', 'Số tiền', 'Tuần trước', 'Tỷ trọng', 'Trạng thái', 'Ghi chú']} rows={report.cashbookGroupRows} maxHeight="max-h-[340px]" /></div>
+          <CardTitle>Chi theo đơn vị chịu chi & bản chất kế toán</CardTitle>
+          <div className="mt-2"><ReportTable headers={['Đơn vị chịu chi', 'Bản chất chi', 'Số tiền', 'Xử lý kế toán', 'Tỷ trọng', 'Trạng thái', 'Hành động']} rows={report.cashbookGroupRows} maxHeight="max-h-[340px]" /></div>
         </Card>
       </section>
       <Card>
         <CardTitle>Khoản chi lớn / cần đối chiếu</CardTitle>
-        <div className="mt-2"><ReportTable headers={['Ngày', 'Mã phiếu', 'Nhóm chi', 'Số tiền', 'Đối tượng', 'Trạng thái', 'Hành động']} rows={report.cashbookLargeExpenseRows} maxHeight="max-h-[280px]" /></div>
+        <div className="mt-2"><ReportTable headers={['Ngày', 'Mã tuần', 'Đơn vị chịu chi', 'Bản chất chi', 'Xử lý kế toán', 'Diễn giải', 'Số tiền', 'Trạng thái', 'Hành động']} rows={report.cashbookLargeExpenseRows} maxHeight="max-h-[300px]" /></div>
       </Card>
     </div>
   );
