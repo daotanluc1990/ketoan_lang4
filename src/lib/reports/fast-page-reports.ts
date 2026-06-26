@@ -1,16 +1,17 @@
 import { getDataStore } from '@/lib/data-store';
 import { SHEET_NAMES } from '@/lib/google-sheets/sheet-names';
 import type { Status } from '@/lib/report-types';
+import { calculateBalance } from '@/lib/finance/balance-calculator';
+import { calculatePnl } from '@/lib/finance/pl-calculator';
 import { analyzeCashbookRows } from './cashbook-analysis';
 import { applySourceFilter, isValidImportRow, parseReportFilterFromSearchParams, type ReportFilter } from './report-filters';
 import { pickNumber, type DataRow } from './row-normalizers';
 import { SOURCE_CONTRACTS, SOURCE_KEYS, type SourceKey } from './source-contract';
-import { calculateBalance } from '@/lib/finance/balance-calculator';
 
 type FastKpi = { label: string; value: string; status?: Status };
 
-function formatMoney(value: number) {
-  if (!Number.isFinite(value)) return '—';
+function formatMoney(value: number | null | undefined) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return '—';
   if (Math.abs(value) >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1).replace('.', ',')} tỷ`;
   if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace('.', ',')}tr`;
   return `${Math.round(value).toLocaleString('vi-VN')}đ`;
@@ -47,6 +48,52 @@ function sourceCount(rows: Partial<Record<SourceKey, DataRow[]>>) {
 
 function filterRows(rows: Partial<Record<SourceKey, DataRow[]>>, key: SourceKey, filter: ReportFilter) {
   return applySourceFilter(rows[key] ?? [], key, filter);
+}
+
+export async function buildFastPnlReport(input: ReportFilter | URLSearchParams | Record<string, string | string[] | undefined> = {}) {
+  const filter = parseFilter(input);
+  const rows = await readSourceRows(['storeRevenue', 'appRevenue', 'cashbook', 'lossRows', 'debt', 'purchase']);
+  const storeRevenue = filterRows(rows, 'storeRevenue', filter);
+  const appRevenue = filterRows(rows, 'appRevenue', filter);
+  const cashbook = filterRows(rows, 'cashbook', filter);
+  const lossRows = filterRows(rows, 'lossRows', filter);
+  const debt = filterRows(rows, 'debt', filter);
+  const purchase = filterRows(rows, 'purchase', filter);
+  const pnl = calculatePnl({ storeRevenueRows: storeRevenue, appRevenueRows: appRevenue, cashbookRows: cashbook, lossRows, filter });
+  const analysis = analyzeCashbookRows(cashbook, { debt: debt.length, purchase: purchase.length, inventory: 0, lossRows: lossRows.length });
+  const counts = sourceCount(rows);
+  counts.storeRevenue = storeRevenue.length;
+  counts.appRevenue = appRevenue.length;
+  counts.cashbook = cashbook.length;
+  counts.lossRows = lossRows.length;
+  counts.debt = debt.length;
+  counts.purchase = purchase.length;
+  const revenue = pnl.totals.revenue;
+  const storeSales = pnl.totals.storeSales;
+  const appNet = pnl.totals.appNet;
+  const lossValue = lossRows.reduce((total, row) => total + Math.abs(pickNumber(row, ['Giá trị chênh lệch'])), 0);
+  const executiveKpis: FastKpi[] = [
+    { label: 'Tổng doanh thu', value: formatMoney(revenue), status: revenue ? 'good' : 'neutral' },
+    { label: 'Doanh thu cửa hàng', value: formatMoney(storeSales), status: storeRevenue.length ? 'good' : 'neutral' },
+    { label: 'Doanh thu app net', value: formatMoney(appNet), status: appRevenue.length ? 'good' : 'neutral' },
+    { label: 'Tiền ra', value: formatMoney(analysis.operatingOut), status: cashbook.length ? 'warning' : 'neutral' },
+    { label: 'Chi cần phân loại', value: formatMoney(analysis.unclassifiedOut), status: analysis.unclassifiedOut ? 'warning' : 'good' },
+    { label: 'Thất thoát quy tiền', value: formatMoney(lossValue), status: lossValue ? 'warning' : 'neutral' }
+  ];
+  return {
+    sourceCounts: counts,
+    hasRealData: Boolean(revenue || cashbook.length || lossRows.length),
+    executiveKpis,
+    pnlRows: pnl.rows,
+    cashbookGroupRows: analysis.groupRows,
+    financeEvidenceRows: pnl.evidenceRows,
+    financeLimitationRows: pnl.limitations.map((item) => ['P&L', item, 'Ảnh hưởng kết luận lợi nhuận', 'Kế toán rà lại']),
+    revenueByChannel: [
+      { channel: 'Cửa hàng', revenue: formatMoney(storeSales), value: storeSales },
+      { channel: 'App', revenue: formatMoney(appNet), value: appNet }
+    ],
+    totals: { revenue, cogsPercent: pnl.totals.cogsPercent ?? 0, cashUnclassifiedOut: analysis.unclassifiedOut }
+  };
 }
 
 export async function buildFastCashflowReport(input: ReportFilter | URLSearchParams | Record<string, string | string[] | undefined> = {}) {
