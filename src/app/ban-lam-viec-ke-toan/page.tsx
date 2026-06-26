@@ -4,6 +4,7 @@ import { ReportStatusPanel } from "@/components/report/ReportStatusPanel";
 import { MetricCard } from "@/components/report/MetricCard";
 import { ReportTable } from "@/components/report/ReportTable";
 import { PermissionMatrix } from "@/components/report/PermissionMatrix";
+import { AccountingCostCenterPanel } from "@/components/report/AccountingCostCenterPanel";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { buildDashboardReport } from "@/lib/reports/report-aggregator";
@@ -100,28 +101,31 @@ export default async function BanLamViecKeToanPage({
             />
           </div>
         </Card>
+        <AccountingCostCenterPanel rows={report.cashbookGroupRows} />
+      </section>
+
+      <section className="grid gap-2 xl:grid-cols-2">
         <Card>
           <CardTitle>Lịch sử thao tác kế toán</CardTitle>
           <div className="mt-2">
             <ReportTable
               headers={["Thời gian", "Người xử lý", "Hành động", "Ghi chú"]}
               rows={historyRows.length ? historyRows : [["—", "—", "Chưa đủ dữ liệu", "Chưa có lịch sử import thật"]]}
-              maxHeight="max-h-[360px]"
+              maxHeight="max-h-[300px]"
+            />
+          </div>
+        </Card>
+        <Card>
+          <CardTitle>Ma trận kiểm soát Data Master</CardTitle>
+          <div className="mt-2">
+            <ReportTable
+              headers={["Sheet", "Nhóm", "Tổng dòng", "Dòng hợp lệ", "Dòng chưa hợp lệ", "Trạng thái", "Hành động"]}
+              rows={report.dataQualityMatrixRows}
+              maxHeight="max-h-[300px]"
             />
           </div>
         </Card>
       </section>
-
-      <Card>
-        <CardTitle>Ma trận kiểm soát Data Master</CardTitle>
-        <div className="mt-2">
-          <ReportTable
-            headers={["Sheet", "Nhóm", "Tổng dòng", "Dòng hợp lệ", "Dòng chưa hợp lệ", "Trạng thái", "Hành động"]}
-            rows={report.dataQualityMatrixRows}
-            maxHeight="max-h-[360px]"
-          />
-        </div>
-      </Card>
 
       <PermissionMatrix />
     </div>
