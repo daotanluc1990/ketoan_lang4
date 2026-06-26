@@ -1,7 +1,7 @@
 import type { DataStore, DataRow } from './store-interface';
 import { sheetsRepository } from '@/lib/google-sheets/sheets-repository';
 
-const TTL_MS = 60_000;
+const TTL_MS = 5 * 60 * 1000;
 let rowsBySheet: Record<string, DataRow[]> = {};
 let timeBySheet: Record<string, number> = {};
 
