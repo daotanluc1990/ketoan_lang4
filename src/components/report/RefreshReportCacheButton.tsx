@@ -27,7 +27,7 @@ export function RefreshReportCacheButton() {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Button type="button" onClick={refresh} disabled={loading}>{loading ? 'Đang làm mới...' : 'Làm mới báo cáo'}</Button>
+      <Button onClick={refresh} disabled={loading}>{loading ? 'Đang làm mới...' : 'Làm mới báo cáo'}</Button>
       {message ? <span className="text-xs font-bold text-slate-600">{message}</span> : null}
     </div>
   );
