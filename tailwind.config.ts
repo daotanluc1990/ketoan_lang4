@@ -6,16 +6,20 @@ const config: Config = {
     extend: {
       colors: {
         lang: {
-          red: '#8B1E1E',
-          redDark: '#641515',
-          yellow: '#F6C453',
-          cream: '#F8F3E7',
-          brown: '#2B1C16',
-          ink: '#1F1B16'
+          red: '#9F1F24',
+          redDark: '#6F171B',
+          redSoft: '#FEF2F2',
+          yellow: '#F3C969',
+          cream: '#F8F6F0',
+          brown: '#3B2A20',
+          ink: '#111827',
+          surface: '#FFFFFF',
+          canvas: '#F6F7F9',
+          line: '#E5E7EB'
         }
       },
       boxShadow: {
-        soft: '0 18px 40px rgba(45, 28, 22, 0.08)'
+        soft: '0 16px 36px rgba(17, 24, 39, 0.07)'
       }
     }
   },
