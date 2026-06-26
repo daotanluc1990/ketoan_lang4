@@ -1,10 +1,13 @@
 import { getDataStore } from '@/lib/data-store';
 import { SHEET_NAMES } from '@/lib/google-sheets/sheet-names';
+import type { Status } from '@/lib/report-types';
 import { analyzeCashbookRows } from './cashbook-analysis';
 import { applySourceFilter, isValidImportRow, parseReportFilterFromSearchParams, type ReportFilter } from './report-filters';
 import { pickNumber, type DataRow } from './row-normalizers';
 import { SOURCE_CONTRACTS, SOURCE_KEYS, type SourceKey } from './source-contract';
 import { calculateBalance } from '@/lib/finance/balance-calculator';
+
+type FastKpi = { label: string; value: string; status?: Status };
 
 function formatMoney(value: number) {
   if (!Number.isFinite(value)) return '—';
@@ -66,19 +69,13 @@ export async function buildFastCashflowReport(input: ReportFilter | URLSearchPar
     ['Dòng tiền', 'Dòng tiền tạm', formatMoney(cashEnding), '—', '—', cashEnding < 0 ? 'Cảnh báo' : cashbook.length ? 'Tốt' : 'Chưa đủ dữ liệu', 'Thu - chi'],
     ['Kế toán', 'Chi cần phân loại', formatMoney(analysis.unclassifiedOut), '—', '—', analysis.unclassifiedOut ? 'Cảnh báo' : 'Tốt', 'Rà đơn vị chịu chi/bản chất chi']
   ];
-  return {
-    sourceCounts: counts,
-    executiveKpis: [
-      { label: 'Tiền vào', value: formatMoney(cashIn), status: cashbook.length ? 'good' : 'neutral' },
-      { label: 'Tiền ra', value: formatMoney(cashOut), status: cashbook.length ? 'warning' : 'neutral' },
-      { label: 'Dòng tiền tạm', value: formatMoney(cashEnding), status: cashEnding < 0 ? 'danger' : cashbook.length ? 'good' : 'neutral' },
-      { label: 'Chi cần phân loại', value: formatMoney(analysis.unclassifiedOut), status: analysis.unclassifiedOut ? 'warning' : 'good' }
-    ],
-    totals: { cashEnding, cashUnclassifiedOut: analysis.unclassifiedOut },
-    cashflowRows,
-    cashbookGroupRows: analysis.groupRows,
-    cashbookLargeExpenseRows: analysis.largeExpenseRows
-  };
+  const executiveKpis: FastKpi[] = [
+    { label: 'Tiền vào', value: formatMoney(cashIn), status: cashbook.length ? 'good' : 'neutral' },
+    { label: 'Tiền ra', value: formatMoney(cashOut), status: cashbook.length ? 'warning' : 'neutral' },
+    { label: 'Dòng tiền tạm', value: formatMoney(cashEnding), status: cashEnding < 0 ? 'danger' : cashbook.length ? 'good' : 'neutral' },
+    { label: 'Chi cần phân loại', value: formatMoney(analysis.unclassifiedOut), status: analysis.unclassifiedOut ? 'warning' : 'good' }
+  ];
+  return { sourceCounts: counts, executiveKpis, totals: { cashEnding, cashUnclassifiedOut: analysis.unclassifiedOut }, cashflowRows, cashbookGroupRows: analysis.groupRows, cashbookLargeExpenseRows: analysis.largeExpenseRows };
 }
 
 export async function buildFastBalanceReport(input: ReportFilter | URLSearchParams | Record<string, string | string[] | undefined> = {}) {
@@ -97,21 +94,11 @@ export async function buildFastBalanceReport(input: ReportFilter | URLSearchPara
   counts.lossRows = lossRows.length;
   counts.debt = debt.length;
   counts.purchase = purchase.length;
-  const missingSources = [
-    !cashbook.length ? SHEET_NAMES.DL_SO_QUY : '',
-    !inventory.length ? SHEET_NAMES.DL_TON_KHO : '',
-    !lossRows.length ? SHEET_NAMES.DL_THAT_THOAT_NVL : ''
-  ].filter(Boolean) as string[];
-  return {
-    sourceCounts: counts,
-    missingSources,
-    executiveKpis: [
-      { label: 'Dòng tiền tạm', value: formatMoney(balance.totals.cashNet), status: balance.totals.cashNet < 0 ? 'danger' : cashbook.length ? 'good' : 'neutral' },
-      { label: 'Tồn kho', value: formatMoney(balance.totals.inventoryValue), status: balance.totals.negativeStockCount ? 'warning' : inventory.length ? 'good' : 'neutral' },
-      { label: 'Thất thoát quy tiền', value: formatMoney(lossValue), status: lossValue ? 'warning' : 'neutral' }
-    ],
-    totals: { cashEnding: balance.totals.cashNet, inventoryValue: balance.totals.inventoryValue, negativeStockCount: balance.totals.negativeStockCount, lossValue },
-    balanceRows: balance.rows,
-    financeLimitationRows: balance.limitations.map((item) => ['Cân đối', item, 'Ảnh hưởng chốt báo cáo', 'Kế toán rà lại'])
-  };
+  const missingSources = [!cashbook.length ? SHEET_NAMES.DL_SO_QUY : '', !inventory.length ? SHEET_NAMES.DL_TON_KHO : '', !lossRows.length ? SHEET_NAMES.DL_THAT_THOAT_NVL : ''].filter(Boolean) as string[];
+  const executiveKpis: FastKpi[] = [
+    { label: 'Dòng tiền tạm', value: formatMoney(balance.totals.cashNet), status: balance.totals.cashNet < 0 ? 'danger' : cashbook.length ? 'good' : 'neutral' },
+    { label: 'Tồn kho', value: formatMoney(balance.totals.inventoryValue), status: balance.totals.negativeStockCount ? 'warning' : inventory.length ? 'good' : 'neutral' },
+    { label: 'Thất thoát quy tiền', value: formatMoney(lossValue), status: lossValue ? 'warning' : 'neutral' }
+  ];
+  return { sourceCounts: counts, missingSources, executiveKpis, totals: { cashEnding: balance.totals.cashNet, inventoryValue: balance.totals.inventoryValue, negativeStockCount: balance.totals.negativeStockCount, lossValue }, balanceRows: balance.rows, financeLimitationRows: balance.limitations.map((item) => ['Cân đối', item, 'Ảnh hưởng chốt báo cáo', 'Kế toán rà lại']) };
 }
