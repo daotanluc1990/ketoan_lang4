@@ -11,10 +11,16 @@ function isFresh(sheetName: string) {
 
 async function readRows(sheetName: string) {
   if (isFresh(sheetName)) return rowsBySheet[sheetName];
-  const rows = await sheetsRepository.readRows(sheetName);
-  rowsBySheet = { ...rowsBySheet, [sheetName]: rows };
-  timeBySheet = { ...timeBySheet, [sheetName]: Date.now() };
-  return rows;
+  try {
+    const rows = await sheetsRepository.readRows(sheetName);
+    rowsBySheet = { ...rowsBySheet, [sheetName]: rows };
+    timeBySheet = { ...timeBySheet, [sheetName]: Date.now() };
+    return rows;
+  } catch {
+    rowsBySheet = { ...rowsBySheet, [sheetName]: [] };
+    timeBySheet = { ...timeBySheet, [sheetName]: Date.now() };
+    return [];
+  }
 }
 
 async function readManyRows(sheetNames: string[]) {
@@ -29,12 +35,21 @@ async function readManyRows(sheetNames: string[]) {
   });
 
   if (missing.length) {
-    const freshRows = await sheetsRepository.readRowsBatch(missing);
-    const now = Date.now();
-    for (const sheetName of missing) {
-      result[sheetName] = freshRows[sheetName] ?? [];
-      rowsBySheet = { ...rowsBySheet, [sheetName]: result[sheetName] };
-      timeBySheet = { ...timeBySheet, [sheetName]: now };
+    try {
+      const freshRows = await sheetsRepository.readRowsBatch(missing);
+      const now = Date.now();
+      for (const sheetName of missing) {
+        result[sheetName] = freshRows[sheetName] ?? [];
+        rowsBySheet = { ...rowsBySheet, [sheetName]: result[sheetName] };
+        timeBySheet = { ...timeBySheet, [sheetName]: now };
+      }
+    } catch {
+      const now = Date.now();
+      for (const sheetName of missing) {
+        result[sheetName] = [];
+        rowsBySheet = { ...rowsBySheet, [sheetName]: [] };
+        timeBySheet = { ...timeBySheet, [sheetName]: now };
+      }
     }
   }
   return result;
