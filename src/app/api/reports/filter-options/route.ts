@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/require-auth';
-import { getReportFilterOptions } from '@/lib/reports/report-aggregator';
+import { buildFastFilterOptions } from '@/lib/reports/fast-page-reports';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
   if (!auth.ok) return auth.response;
 
   try {
-    const options = await getReportFilterOptions();
-    return NextResponse.json({ ok: true, options });
+    const options = await buildFastFilterOptions();
+    return NextResponse.json({ ok: true, options }, { headers: { 'Cache-Control': 'private, max-age=300' } });
   } catch (error) {
     return NextResponse.json({ ok: false, message: error instanceof Error ? error.message : 'Không đọc được danh sách bộ lọc từ dữ liệu thật.' }, { status: 500 });
   }
