@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { PilotFilterBar } from './PilotFilterBar';
 import type { AuthUser } from '@/lib/auth/auth-types';
 
 const PILOT_COLLAPSE_KEY = 'ctl-erp-pilot-sidebar-collapsed';
@@ -133,17 +134,7 @@ export function OverviewPilotShell({ children, user }: { children: React.ReactNo
           </div>
         </header>
 
-        <section className="sticky top-[62px] z-10 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur lg:px-6">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-black text-slate-600">
-              <span className="text-slate-900">Bộ lọc</span>
-              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">0 bộ lọc</span>
-              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-amber-700">2026-06-07 → 2026-06-23</span>
-              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-amber-700">{meta.status}</span>
-            </div>
-            <button className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-black text-slate-700 shadow-sm" type="button">Mở bộ lọc</button>
-          </div>
-        </section>
+        <PilotFilterBar status={meta.status} />
 
         <main className="px-4 pb-28 pt-4 lg:px-6">{children}</main>
       </div>
@@ -156,9 +147,9 @@ export function OverviewPilotShell({ children, user }: { children: React.ReactNo
         </div>
         <div className="flex flex-1 justify-end gap-3">
           <Link className="inline-flex h-11 min-w-[180px] items-center justify-center rounded-xl bg-[#b80012] px-4 text-sm font-black text-white" href={meta.primaryHref}>{meta.primaryLabel}</Link>
-          <button className="h-11 min-w-[180px] rounded-xl border border-[#b80012] bg-white px-4 text-sm font-black text-[#b80012]" type="button">Đối chiếu dữ liệu</button>
-          <button className="h-11 min-w-[160px] rounded-xl border border-[#b80012] bg-white px-4 text-sm font-black text-[#b80012]" type="button">Xuất báo cáo</button>
-          <button className="h-11 min-w-[150px] rounded-xl bg-[#b80012] px-4 text-sm font-black text-white" type="button">{meta.dangerLabel}</button>
+          <Link className="inline-flex h-11 min-w-[180px] items-center justify-center rounded-xl border border-[#b80012] bg-white px-4 text-sm font-black text-[#b80012]" href="/ban-lam-viec-ke-toan">Đối chiếu dữ liệu</Link>
+          <Link className="inline-flex h-11 min-w-[160px] items-center justify-center rounded-xl border border-[#b80012] bg-white px-4 text-sm font-black text-[#b80012]" href={pathname}>Xuất báo cáo</Link>
+          <Link className="inline-flex h-11 min-w-[150px] items-center justify-center rounded-xl bg-[#b80012] px-4 text-sm font-black text-white" href="/that-thoat-chi-tiet">{meta.dangerLabel}</Link>
         </div>
       </div>
     </div>
