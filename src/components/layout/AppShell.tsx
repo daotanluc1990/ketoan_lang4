@@ -11,6 +11,7 @@ import { OverviewPilotShell } from '@/components/erp-pilot/OverviewPilotShell';
 import type { AuthUser } from '@/lib/auth/auth-types';
 
 const COLLAPSE_KEY = 'ctl-ceo-sidebar-collapsed';
+const PILOT_ROUTES = new Set(['/tong-quan', '/pl-tuan', '/dong-tien', '/that-thoat-chi-tiet']);
 
 function readStoredBool(key: string, fallback: boolean) {
   if (typeof window === 'undefined') return fallback;
@@ -26,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(() => readStoredBool(COLLAPSE_KEY, false));
   const isLoginPage = pathname === '/login';
-  const isOverviewPilot = pathname === '/tong-quan';
+  const isPilotRoute = PILOT_ROUTES.has(pathname);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(() => !isLoginPage);
 
@@ -79,7 +80,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (isOverviewPilot) {
+  if (isPilotRoute) {
     return <OverviewPilotShell user={user}>{children}</OverviewPilotShell>;
   }
 
