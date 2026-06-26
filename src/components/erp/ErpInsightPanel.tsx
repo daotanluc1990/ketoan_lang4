@@ -9,13 +9,17 @@ const dotTone = {
 
 type Tone = keyof typeof dotTone;
 
+function normalizeTone(tone?: string): Tone {
+  return tone === 'danger' || tone === 'warning' || tone === 'good' || tone === 'neutral' ? tone : 'neutral';
+}
+
 export function ErpInsightPanel({
   title,
   rows,
   actionLabel
 }: {
   title: string;
-  rows: Array<{ label: string; value?: string | number; tone?: Tone; caption?: string }>;
+  rows: Array<{ label: string; value?: string | number; tone?: string; caption?: string }>;
   actionLabel?: string;
 }) {
   return (
@@ -25,16 +29,19 @@ export function ErpInsightPanel({
         {actionLabel ? <span className="text-[12px] font-black text-red-700">{actionLabel}</span> : null}
       </div>
       <div className="divide-y divide-slate-100 px-4 py-2">
-        {rows.length ? rows.map((row) => (
-          <div className="flex items-center gap-3 py-3" key={row.label}>
-            <span className={clsx('h-2.5 w-2.5 shrink-0 rounded-full', dotTone[row.tone ?? 'neutral'])} />
-            <div className="min-w-0 flex-1">
-              <p className="line-clamp-1 text-[13px] font-bold text-slate-900">{row.label}</p>
-              {row.caption ? <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-slate-500">{row.caption}</p> : null}
+        {rows.length ? rows.map((row) => {
+          const tone = normalizeTone(row.tone);
+          return (
+            <div className="flex items-center gap-3 py-3" key={row.label}>
+              <span className={clsx('h-2.5 w-2.5 shrink-0 rounded-full', dotTone[tone])} />
+              <div className="min-w-0 flex-1">
+                <p className="line-clamp-2 text-[13px] font-bold text-slate-900">{row.label}</p>
+                {row.caption ? <p className="mt-0.5 line-clamp-2 text-[11px] font-semibold text-slate-500">{row.caption}</p> : null}
+              </div>
+              {row.value !== undefined ? <span className="number max-w-[110px] shrink-0 text-right text-[13px] font-black text-slate-700">{row.value}</span> : null}
             </div>
-            {row.value !== undefined ? <span className="number shrink-0 text-[13px] font-black text-slate-700">{row.value}</span> : null}
-          </div>
-        )) : <p className="py-6 text-sm font-semibold text-slate-500">Chưa có dữ liệu.</p>}
+          );
+        }) : <p className="py-6 text-sm font-semibold text-slate-500">Chưa có dữ liệu.</p>}
       </div>
     </section>
   );
