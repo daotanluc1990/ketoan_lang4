@@ -2,6 +2,7 @@ import { ErpDataTable } from '@/components/erp/ErpDataTable';
 import { ErpInsightPanel } from '@/components/erp/ErpInsightPanel';
 import { ErpKpiCard } from '@/components/erp/ErpKpiCard';
 import { ErpPageHeader } from '@/components/erp/ErpPageHeader';
+import { ErpSectionFrame } from '@/components/erp/ErpSectionFrame';
 import { ErpStatusStrip } from '@/components/erp/ErpStatusStrip';
 import { buildSnapshotOverviewReport } from '@/lib/reports/cached-fast-page-reports';
 import { resolvePageSearchParams, type PageSearchParams } from '@/lib/reports/page-search-params';
@@ -44,46 +45,43 @@ export default async function TongQuanPage({ searchParams }: { searchParams?: Pa
       />
 
       {missingSourceCount ? (
-        <section className="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] font-bold text-amber-900">
-          Còn {missingSourceCount} nguồn cần bổ sung: <span className="font-black">{report.missingSources.join(', ')}</span>.
-        </section>
+        <ErpSectionFrame tone="risk" title="Nguồn dữ liệu cần bổ sung">
+          <p className="text-[12px] font-bold text-amber-900">Còn {missingSourceCount} nguồn cần bổ sung: <span className="font-black">{report.missingSources.join(', ')}</span>.</p>
+        </ErpSectionFrame>
       ) : null}
 
-      <section className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
-        {mainKpis.map((kpi) => (
-          <ErpKpiCard
-            key={kpi.label}
-            label={kpi.label}
-            value={kpi.value}
-            hint={kpiCopy[kpi.label]?.hint ?? kpi.hint}
-            trend={kpi.trend}
-            status={kpi.status ?? 'neutral'}
-            icon={kpiCopy[kpi.label]?.icon}
-          />
-        ))}
-      </section>
+      <ErpSectionFrame tone="kpi" title="Chỉ số chính" description="6 chỉ số CEO cần nhìn trước khi xuống bảng chi tiết.">
+        <section className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+          {mainKpis.map((kpi) => (
+            <ErpKpiCard
+              key={kpi.label}
+              label={kpi.label}
+              value={kpi.value}
+              hint={kpiCopy[kpi.label]?.hint ?? kpi.hint}
+              trend={kpi.trend}
+              status={kpi.status ?? 'neutral'}
+              icon={kpiCopy[kpi.label]?.icon}
+            />
+          ))}
+        </section>
+      </ErpSectionFrame>
 
-      <ErpStatusStrip
-        items={[
-          { label: 'Tất cả vấn đề', value: openTaskCount + issueCount + missingSourceCount, tone: openTaskCount + issueCount + missingSourceCount ? 'warning' : 'good', icon: 'ALL' },
-          { label: 'Cần xử lý', value: openTaskCount, tone: openTaskCount ? 'warning' : 'good', icon: 'TASK' },
-          { label: 'Vấn đề trước khi chốt', value: issueCount, tone: issueCount ? 'warning' : 'good', icon: 'CHK' },
-          { label: 'Nguồn còn thiếu', value: missingSourceCount, tone: missingSourceCount ? 'danger' : 'good', icon: 'DATA' },
-          { label: 'Nguồn đã đạt', value: readySources, tone: readySources ? 'good' : 'neutral', icon: 'OK' },
-          { label: 'Thất thoát cần rà', value: report.lossTop5Rows.length, tone: report.lossTop5Rows.length ? 'warning' : 'neutral', icon: 'TT' }
-        ]}
-      />
+      <ErpSectionFrame tone="summary" title="Sức khỏe dữ liệu & cảnh báo" contentClassName="p-0">
+        <ErpStatusStrip
+          items={[
+            { label: 'Tất cả vấn đề', value: openTaskCount + issueCount + missingSourceCount, tone: openTaskCount + issueCount + missingSourceCount ? 'warning' : 'good', icon: 'ALL' },
+            { label: 'Cần xử lý', value: openTaskCount, tone: openTaskCount ? 'warning' : 'good', icon: 'TASK' },
+            { label: 'Vấn đề trước khi chốt', value: issueCount, tone: issueCount ? 'warning' : 'good', icon: 'CHK' },
+            { label: 'Nguồn còn thiếu', value: missingSourceCount, tone: missingSourceCount ? 'danger' : 'good', icon: 'DATA' },
+            { label: 'Nguồn đã đạt', value: readySources, tone: readySources ? 'good' : 'neutral', icon: 'OK' },
+            { label: 'Thất thoát cần rà', value: report.lossTop5Rows.length, tone: report.lossTop5Rows.length ? 'warning' : 'neutral', icon: 'TT' }
+          ]}
+        />
+      </ErpSectionFrame>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-        <section className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h3 className="text-[15px] font-black tracking-[-0.015em] text-slate-950">Doanh thu theo nguồn</h3>
-              <p className="mt-0.5 text-[11px] font-semibold text-slate-500">Nếu doanh thu bằng 0đ, cần import/đối chiếu nguồn.</p>
-            </div>
-            <span className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-black uppercase text-slate-500">BAR</span>
-          </div>
-          <div className="mt-3 space-y-3">
+        <ErpSectionFrame tone="neutral" title="Doanh thu theo nguồn" description="Nếu doanh thu bằng 0đ, cần import/đối chiếu nguồn.">
+          <div className="space-y-3">
             {report.revenueByChannel.map((item, index) => (
               <div key={item.channel}>
                 <div className="mb-1 flex items-center justify-between gap-3 text-[12px] font-black text-slate-700">
@@ -96,7 +94,7 @@ export default async function TongQuanPage({ searchParams }: { searchParams?: Pa
               </div>
             ))}
           </div>
-        </section>
+        </ErpSectionFrame>
 
         <ErpDataTable
           title="Việc kế toán cần xử lý"
@@ -128,20 +126,22 @@ export default async function TongQuanPage({ searchParams }: { searchParams?: Pa
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
-        <ErpDataTable
-          title="Thất thoát NVL — cần giải trình"
-          headers={['NVL', 'ĐVT', 'Chênh SL', 'Giá trị lệch', 'Tỷ lệ', 'Trạng thái', 'Hành động']}
-          rows={report.lossTop5Rows.map((row) => [row[0], row[1], row[2], row[3], row[4], row[7], row[8]])}
-          maxHeight="max-h-[300px]"
-        />
-        <ErpDataTable
-          title="Ma trận nguồn chính"
-          headers={['Sheet', 'Vai trò', 'Dòng', 'Trạng thái', 'Ảnh hưởng']}
-          rows={report.sourceReadinessRows}
-          maxHeight="max-h-[300px]"
-        />
-      </section>
+      <ErpSectionFrame tone="risk" title="Kiểm soát thất thoát & nguồn chính" contentClassName="p-3">
+        <section className="grid gap-4 xl:grid-cols-2">
+          <ErpDataTable
+            title="Thất thoát NVL — cần giải trình"
+            headers={['NVL', 'ĐVT', 'Chênh SL', 'Giá trị lệch', 'Tỷ lệ', 'Trạng thái', 'Hành động']}
+            rows={report.lossTop5Rows.map((row) => [row[0], row[1], row[2], row[3], row[4], row[7], row[8]])}
+            maxHeight="max-h-[300px]"
+          />
+          <ErpDataTable
+            title="Ma trận nguồn chính"
+            headers={['Sheet', 'Vai trò', 'Dòng', 'Trạng thái', 'Ảnh hưởng']}
+            rows={report.sourceReadinessRows}
+            maxHeight="max-h-[300px]"
+          />
+        </section>
+      </ErpSectionFrame>
     </div>
   );
 }
