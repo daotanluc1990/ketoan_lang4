@@ -62,7 +62,7 @@ export default async function PlTuanPage({ searchParams }: { searchParams?: Page
           { label: 'Thất thoát', value: lossKpi, tone: lossKpi === '0đ' ? 'good' : 'warning', icon: 'TT' },
           { label: 'Bằng chứng', value: evidenceCount, tone: evidenceCount ? 'good' : 'neutral', icon: 'DOC' },
           { label: 'Giới hạn', value: limitationCount, tone: limitationCount ? 'warning' : 'good', icon: 'LIM' },
-          { label: 'Trạng thái', value: status, tone: status === 'Tốt' ? 'good' : 'warning', icon: 'CHK' }
+          { label: 'Trạng thái', value: status, tone: report.hasRealData ? 'warning' : 'neutral', icon: 'CHK' }
         ]}
       />
 
