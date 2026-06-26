@@ -16,6 +16,11 @@ function isFresh<T>(entry?: CacheEntry<T>) {
   return Boolean(entry && entry.expiresAt > Date.now());
 }
 
+export function hasExternalReportCache() {
+  const env = getCacheEnv();
+  return Boolean(env.url && env.token);
+}
+
 async function readExternalCache<T>(key: string): Promise<T | null> {
   const env = getCacheEnv();
   if (!env.url || !env.token) return null;
@@ -49,6 +54,12 @@ async function writeExternalCache<T>(key: string, value: T, ttlSeconds: number) 
   }
 }
 
+export async function setReportCache<T>(key: string, ttlSeconds: number, value: T) {
+  memoryCache.set(key, { value, expiresAt: Date.now() + ttlSeconds * 1000 });
+  await writeExternalCache(key, value, ttlSeconds);
+  return value;
+}
+
 export async function getOrSetReportCache<T>(key: string, ttlSeconds: number, producer: () => Promise<T>): Promise<T> {
   const memoryEntry = memoryCache.get(key) as CacheEntry<T> | undefined;
   if (isFresh(memoryEntry)) return memoryEntry!.value;
@@ -60,9 +71,7 @@ export async function getOrSetReportCache<T>(key: string, ttlSeconds: number, pr
   }
 
   const value = await producer();
-  memoryCache.set(key, { value, expiresAt: Date.now() + ttlSeconds * 1000 });
-  await writeExternalCache(key, value, ttlSeconds);
-  return value;
+  return setReportCache(key, ttlSeconds, value);
 }
 
 export function stableCacheKey(scope: string, input: unknown) {
