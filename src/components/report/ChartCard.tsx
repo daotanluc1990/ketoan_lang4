@@ -18,23 +18,23 @@ export function ChartCard({
     <Card>
       <div className="flex items-center justify-between gap-2">
         <CardTitle>{title}</CardTitle>
-        <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase text-slate-600">
+        <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[9px] font-black uppercase text-slate-500">
           {type === 'line' ? 'Trend' : type === 'status' ? 'Status' : 'Bar'}
         </span>
       </div>
       {description ? <p className="sr-only">{description}</p> : null}
 
-      <div className="mt-2 space-y-1.5">
+      <div className="mt-3 space-y-2">
         {safeItems.slice(0, 7).map((item) => {
           const width = `${Math.max(7, Math.round((item.value / max) * 100))}%`;
           return (
             <div key={item.label}>
               <div className="flex items-center justify-between gap-2 text-[11px] leading-4 md:text-xs">
-                <span className="truncate font-bold text-slate-800">{item.label}</span>
+                <span className="truncate font-bold text-slate-700">{item.label}</span>
                 <span className="number shrink-0 text-slate-500">{item.caption ?? item.value}</span>
               </div>
               <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                <div className="h-full rounded-full bg-red-700" style={{ width }} />
+                <div className="h-full rounded-full bg-lang-red/80" style={{ width }} />
               </div>
             </div>
           );
