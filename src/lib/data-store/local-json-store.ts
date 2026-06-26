@@ -1,8 +1,11 @@
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import type { DataRow, DataStore } from './store-interface';
 
-const DATA_DIR = path.join(process.cwd(), '.data');
+const DATA_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'com-tam-lang-data')
+  : path.join(process.cwd(), '.data');
 
 async function ensureDir() {
   await fs.mkdir(DATA_DIR, { recursive: true });
@@ -14,8 +17,8 @@ function filePath(sheetName: string) {
 
 export const localJsonStore: DataStore = {
   async read(sheetName: string): Promise<DataRow[]> {
-    await ensureDir();
     try {
+      await ensureDir();
       const raw = await fs.readFile(filePath(sheetName), 'utf-8');
       return JSON.parse(raw) as DataRow[];
     } catch {
