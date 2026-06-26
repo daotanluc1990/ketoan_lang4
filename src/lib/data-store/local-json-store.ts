@@ -22,6 +22,10 @@ export const localJsonStore: DataStore = {
       return [];
     }
   },
+  async readMany(sheetNames: string[]) {
+    const entries = await Promise.all(sheetNames.map(async (sheetName) => [sheetName, await this.read(sheetName)] as const));
+    return Object.fromEntries(entries) as Record<string, DataRow[]>;
+  },
   async append(sheetName: string, rows: DataRow[]) {
     const current = await this.read(sheetName);
     await this.replace(sheetName, [...current, ...rows]);
