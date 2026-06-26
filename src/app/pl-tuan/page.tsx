@@ -22,34 +22,45 @@ export default async function PlTuanPage({ searchParams }: { searchParams?: Page
   const report = await buildDashboardReport(await resolvePageSearchParams(searchParams));
   const status = report.hasRealData ? (report.missingSources.length ? 'Cần đối chiếu' : 'Tốt') : 'Chưa đủ dữ liệu';
   const pnlKpis = report.executiveKpis.filter((kpi) => Object.keys(pnlTrend).includes(kpi.label));
+  const lossKpi = report.executiveKpis.find((kpi) => kpi.label === 'Thất thoát quy tiền')?.value ?? '—';
 
   return (
     <div className="space-y-2.5">
-      <PageHeader title="P&L Tuần" description="Doanh thu, giá vốn, chi phí cửa hàng, chi Bếp Trung Tâm riêng và lợi nhuận tạm." status={status} />
-      {!report.hasRealData ? <EmptyState title="Chưa đủ dữ liệu để kết luận" description="Hãy import dữ liệu thật trước khi chốt P&L." /> : null}
+      <PageHeader title="P&L Tuần" description="Doanh thu, giá vốn, chi phí và lợi nhuận tạm." status={status} />
+      {!report.hasRealData ? <EmptyState title="Chưa đủ dữ liệu để kết luận" description="Import dữ liệu thật trước khi chốt P&L." /> : null}
 
       <section className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
         {pnlKpis.map((kpi) => <MetricCard key={kpi.label} label={kpi.label} value={kpi.value} trend={pnlTrend[kpi.label]} status={kpi.status} compact />)}
       </section>
 
-      <section className="grid gap-2.5 xl:grid-cols-[minmax(0,2.2fr)_minmax(260px,0.8fr)]">
+      <section className="grid gap-2 xl:grid-cols-[minmax(0,2.2fr)_minmax(260px,0.8fr)]">
         <Card>
           <CardTitle>Bảng P&L chính</CardTitle>
-          <div className="mt-2"><ReportTable headers={['Nhóm', 'Chỉ số', 'Tuần này', 'Tuần trước', 'Chênh lệch', 'Tỷ lệ', 'Đánh giá']} rows={report.pnlRows} maxHeight="max-h-[440px]" /></div>
+          <div className="mt-2"><ReportTable headers={['Nhóm', 'Chỉ số', 'Tuần này', 'Tuần trước', 'Chênh lệch', 'Tỷ lệ', 'Đánh giá']} rows={report.pnlRows} maxHeight="max-h-[420px]" /></div>
         </Card>
         <Card>
-          <CardTitle>Ghi chú chốt P&L</CardTitle>
-          <div className="mt-2 space-y-1.5 text-xs leading-5 text-black/65 md:text-sm">
-            <p>{report.hasRealData ? 'Đã đọc dữ liệu import.' : 'Chưa đủ dữ liệu.'}</p>
-            <p>Chi Bếp Trung Tâm theo dõi riêng, không trộn vào chi phí cửa hàng.</p>
-            <p>{report.missingSources.length ? `Thiếu: ${report.missingSources.join(', ')}.` : 'Không thiếu nguồn chính.'}</p>
+          <CardTitle>Tín hiệu chốt P&L</CardTitle>
+          <div className="mt-2">
+            <ReportTable
+              headers={['Chỉ số', 'Giá trị', 'Đọc nhanh']}
+              rows={[
+                ['COGS tạm tính', `${(report.totals.cogsPercent * 100).toFixed(1)}%`, 'Theo giá vốn tạm tính'],
+                ['Thất thoát', lossKpi, 'Theo báo cáo NVL'],
+                ['Chi cần phân loại', report.executiveKpis.find((kpi) => kpi.label === 'Chi cần phân loại')?.value ?? '—', 'Kế toán rà trước khi chốt'],
+                ['Chi Bếp Trung Tâm', 'Theo dõi riêng', 'Không trộn chi cửa hàng']
+              ]}
+              maxHeight="max-h-[220px]"
+            />
           </div>
         </Card>
       </section>
 
-      <section className="grid gap-2.5 xl:grid-cols-2">
+      <section className="grid gap-2 xl:grid-cols-2">
         <ChartCard title="Doanh thu theo nguồn" items={report.revenueByChannel.map((item) => ({ label: item.channel, value: item.value, caption: item.revenue }))} />
-        <ChartCard title="Tỷ lệ cần theo dõi" items={[{ label: 'COGS tạm tính', value: report.totals.cogsPercent * 100, caption: `${(report.totals.cogsPercent * 100).toFixed(1)}%` }, { label: 'Thất thoát', value: report.totals.lossValue, caption: report.executiveKpis.find((kpi) => kpi.label === 'Thất thoát quy tiền')?.value ?? '—' }]} />
+        <Card>
+          <CardTitle>Bằng chứng & giới hạn tài chính</CardTitle>
+          <div className="mt-2"><ReportTable headers={['Nguồn', 'Chỉ số', 'Giá trị', 'Ghi chú']} rows={[...report.financeEvidenceRows, ...report.financeLimitationRows].slice(0, 10)} maxHeight="max-h-[260px]" /></div>
+        </Card>
       </section>
     </div>
   );
