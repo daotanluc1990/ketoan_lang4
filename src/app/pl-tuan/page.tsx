@@ -28,11 +28,9 @@ export default async function PlTuanPage({ searchParams }: { searchParams?: Page
     <div className="space-y-2.5">
       <PageHeader title="P&L Tuần" description="Doanh thu, giá vốn, chi phí và lợi nhuận tạm." status={status} />
       {!report.hasRealData ? <EmptyState title="Chưa đủ dữ liệu để kết luận" description="Import dữ liệu thật trước khi chốt P&L." /> : null}
-
       <section className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
         {pnlKpis.map((kpi) => <MetricCard key={kpi.label} label={kpi.label} value={kpi.value} trend={pnlTrend[kpi.label]} status={kpi.status} compact />)}
       </section>
-
       <section className="grid gap-2 xl:grid-cols-[minmax(0,2.2fr)_minmax(260px,0.8fr)]">
         <Card>
           <CardTitle>Bảng P&L chính</CardTitle>
@@ -40,28 +38,20 @@ export default async function PlTuanPage({ searchParams }: { searchParams?: Page
         </Card>
         <Card>
           <CardTitle>Tín hiệu chốt P&L</CardTitle>
-          <div className="mt-2">
-            <ReportTable
-              headers={['Chỉ số', 'Giá trị', 'Đọc nhanh']}
-              rows={[
-                ['COGS tạm tính', `${(report.totals.cogsPercent * 100).toFixed(1)}%`, 'Theo giá vốn tạm tính'],
-                ['Thất thoát', lossKpi, 'Theo báo cáo NVL'],
-                ['Chi cần phân loại', report.executiveKpis.find((kpi) => kpi.label === 'Chi cần phân loại')?.value ?? '—', 'Kế toán rà trước khi chốt'],
-                ['Chi Bếp Trung Tâm', 'Theo dõi riêng', 'Không trộn chi cửa hàng']
-              ]}
-              maxHeight="max-h-[220px]"
-            />
-          </div>
+          <div className="mt-2"><ReportTable headers={['Chỉ số', 'Giá trị', 'Đọc nhanh']} rows={[[ 'COGS tạm tính', `${(report.totals.cogsPercent * 100).toFixed(1)}%`, 'Theo giá vốn tạm tính' ], [ 'Thất thoát', lossKpi, 'Theo báo cáo NVL' ], [ 'Chi cần phân loại', report.executiveKpis.find((kpi) => kpi.label === 'Chi cần phân loại')?.value ?? '—', 'Kế toán rà trước khi chốt' ], [ 'Chi Bếp Trung Tâm', 'Theo dõi riêng', 'Tách khỏi chi phí cửa hàng' ]]} maxHeight="max-h-[220px]" /></div>
         </Card>
       </section>
-
       <section className="grid gap-2 xl:grid-cols-2">
-        <ChartCard title="Doanh thu theo nguồn" items={report.revenueByChannel.map((item) => ({ label: item.channel, value: item.value, caption: item.revenue }))} />
         <Card>
-          <CardTitle>Bằng chứng & giới hạn tài chính</CardTitle>
-          <div className="mt-2"><ReportTable headers={['Nguồn', 'Chỉ số', 'Giá trị', 'Ghi chú']} rows={[...report.financeEvidenceRows, ...report.financeLimitationRows].slice(0, 10)} maxHeight="max-h-[260px]" /></div>
+          <CardTitle>Chi theo đơn vị chịu chi</CardTitle>
+          <div className="mt-2"><ReportTable headers={['Đơn vị', 'Bản chất', 'Số tiền', 'Xử lý', 'Tỷ trọng', 'Trạng thái', 'Hành động']} rows={report.cashbookGroupRows} maxHeight="max-h-[300px]" /></div>
+        </Card>
+        <Card>
+          <CardTitle>Bằng chứng và giới hạn</CardTitle>
+          <div className="mt-2"><ReportTable headers={['Nguồn', 'Chỉ số', 'Giá trị', 'Ghi chú']} rows={[...report.financeEvidenceRows, ...report.financeLimitationRows].slice(0, 10)} maxHeight="max-h-[300px]" /></div>
         </Card>
       </section>
+      <ChartCard title="Doanh thu theo nguồn" items={report.revenueByChannel.map((item) => ({ label: item.channel, value: item.value, caption: item.revenue }))} />
     </div>
   );
 }
