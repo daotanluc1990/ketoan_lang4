@@ -10,11 +10,13 @@ export type SheetAppendRequest = {
 export type SheetsClient = {
   appendRows(request: SheetAppendRequest): Promise<void>;
   readRows(sheetName: string): Promise<Record<string, unknown>[]>;
+  readRowsBatch(sheetNames: string[]): Promise<Record<string, Record<string, unknown>[]>>;
   healthCheck(): Promise<{ ok: boolean; mode: 'real' | 'missing_env'; spreadsheetIdConfigured: boolean; accessible?: boolean; sheetCount?: number; message: string }>;
 };
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 const MAX_HEADER_SCAN_ROWS = 10;
+const MIN_READ_COLUMNS = 12;
 
 function getSchemaColumns(sheetName: string) {
   return GOOGLE_SHEETS_SCHEMA.find((sheet) => sheet.sheetName === sheetName)?.columns ?? [];
@@ -29,6 +31,18 @@ function columnNumberToLetter(columnNumber: number) {
     num = Math.floor((num - 1) / 26);
   }
   return letters || 'A';
+}
+
+function endColumnForSheet(sheetName: string) {
+  return columnNumberToLetter(Math.max(getSchemaColumns(sheetName).length, MIN_READ_COLUMNS));
+}
+
+function rowRange(sheetName: string) {
+  return `'${sheetName}'!A:${endColumnForSheet(sheetName)}`;
+}
+
+function headerRange(sheetName: string) {
+  return `'${sheetName}'!A1:${endColumnForSheet(sheetName)}${MAX_HEADER_SCAN_ROWS}`;
 }
 
 function normalizeCell(value: unknown) {
@@ -50,7 +64,7 @@ function detectHeader(values: unknown[][], sheetName: string) {
     const cells = row.map(String).map((value) => value.trim()).filter(Boolean);
     if (!cells.length) return;
     const score = cells.reduce((total, cell) => total + (schemaSet.has(clean(cell)) ? 1 : 0), 0);
-    const hasKeyColumn = cells.some((cell) => ['mã dòng dữ liệu', 'mã lần import', 'ngày', 'chỉ số', 'mã lần import'].includes(clean(cell)));
+    const hasKeyColumn = cells.some((cell) => ['mã dòng dữ liệu', 'mã lần import', 'ngày', 'chỉ số'].includes(clean(cell)));
     const weightedScore = score + (hasKeyColumn ? 2 : 0);
     if (weightedScore > best.score) best = { index, score: weightedScore, header: cells };
   });
@@ -62,7 +76,7 @@ function detectHeader(values: unknown[][], sheetName: string) {
 async function createSheetsApi() {
   const env = getServerEnv();
   if (!hasGoogleSheetsEnv()) {
-    throw new Error('Thiếu GOOGLE_SHEET_ID / GOOGLE_CLIENT_EMAIL / GOOGLE_PRIVATE_KEY. Chưa thể kết nối Google Sheet thật.');
+    throw new Error('Thiếu cấu hình Google Sheets. Chưa thể kết nối dữ liệu thật.');
   }
   const googleAuth = new auth.GoogleAuth({
     credentials: {
@@ -82,7 +96,7 @@ async function readHeader(sheetName: string) {
   const { api, spreadsheetId } = await createSheetsApi();
   const response = await api.spreadsheets.values.get({
     spreadsheetId,
-    range: `'${sheetName}'!A1:ZZ${MAX_HEADER_SCAN_ROWS}`,
+    range: headerRange(sheetName),
     valueRenderOption: 'FORMATTED_VALUE'
   });
   const values = (response.data.values ?? []) as unknown[][];
@@ -93,6 +107,19 @@ async function readHeader(sheetName: string) {
 
 function rowHasContent(row: unknown[]) {
   return row.some((cell) => String(cell ?? '').trim() !== '');
+}
+
+function mapRows(sheetName: string, values: unknown[][]) {
+  const detected = detectHeader(values, sheetName);
+  const header = detected.header.length ? detected.header : getSchemaColumns(sheetName);
+  const dataStartIndex = detected.index >= 0 ? detected.index + 1 : 1;
+  return values.slice(dataStartIndex).filter(rowHasContent).map((row: unknown[]) => {
+    const obj: Record<string, unknown> = {};
+    header.forEach((column, index) => {
+      obj[column] = row[index] ?? '';
+    });
+    return obj;
+  });
 }
 
 export function createSheetsClient(): SheetsClient {
@@ -116,21 +143,29 @@ export function createSheetsClient(): SheetsClient {
       const { api, spreadsheetId } = await createSheetsApi();
       const response = await api.spreadsheets.values.get({
         spreadsheetId,
-        range: `'${sheetName}'!A:ZZ`,
+        range: rowRange(sheetName),
         valueRenderOption: 'UNFORMATTED_VALUE',
         dateTimeRenderOption: 'FORMATTED_STRING'
       });
-      const values = (response.data.values ?? []) as unknown[][];
-      const detected = detectHeader(values, sheetName);
-      const header = detected.header.length ? detected.header : getSchemaColumns(sheetName);
-      const dataStartIndex = detected.index >= 0 ? detected.index + 1 : 1;
-      return values.slice(dataStartIndex).filter(rowHasContent).map((row: unknown[]) => {
-        const obj: Record<string, unknown> = {};
-        header.forEach((column, index) => {
-          obj[column] = row[index] ?? '';
-        });
-        return obj;
+      return mapRows(sheetName, (response.data.values ?? []) as unknown[][]);
+    },
+
+    async readRowsBatch(sheetNames) {
+      const uniqueSheetNames = Array.from(new Set(sheetNames));
+      if (!uniqueSheetNames.length) return {};
+      const { api, spreadsheetId } = await createSheetsApi();
+      const response = await api.spreadsheets.values.batchGet({
+        spreadsheetId,
+        ranges: uniqueSheetNames.map(rowRange),
+        valueRenderOption: 'UNFORMATTED_VALUE',
+        dateTimeRenderOption: 'FORMATTED_STRING'
       });
+      const result: Record<string, Record<string, unknown>[]> = {};
+      uniqueSheetNames.forEach((sheetName, index) => {
+        const values = (response.data.valueRanges?.[index]?.values ?? []) as unknown[][];
+        result[sheetName] = mapRows(sheetName, values);
+      });
+      return result;
     },
 
     async healthCheck() {
