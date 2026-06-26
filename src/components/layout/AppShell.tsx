@@ -71,14 +71,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (checkingAuth || !user) {
     return (
-      <div className="min-h-screen bg-lang-cream p-4 text-lang-ink">
+      <div className="min-h-screen bg-slate-50 p-4 text-slate-900">
         <LoadingState label="Đang kiểm tra đăng nhập trước khi mở dữ liệu CEO/Kế toán..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-lang-cream text-lang-ink">
+    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900">
       <Sidebar collapsed={collapsed} onToggle={toggleCollapsed} />
       <div className={clsx('min-h-screen transition-[padding] duration-200', contentPadding)}>
         <TopBar user={user} />
