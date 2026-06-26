@@ -12,7 +12,7 @@ export function PilotFilterBar({ status }: { status: string }) {
   const [toDate, setToDate] = useState(params.get('toDate') ?? '');
   const [branch, setBranch] = useState(params.get('branch') ?? '');
   const activeCount = [fromDate, toDate, branch].filter(Boolean).length;
-  const dateLabel = fromDate || toDate ? `${fromDate || '—'} → ${toDate || '—'}` : 'Chưa lọc ngày';
+  const dateLabel = fromDate || toDate ? `${fromDate || '—'} → ${toDate || '—'}` : 'Theo kỳ hiện tại';
 
   function apply() {
     const next = new URLSearchParams(params.toString());
@@ -35,7 +35,7 @@ export function PilotFilterBar({ status }: { status: string }) {
   }
 
   return (
-    <section className="sticky top-[62px] z-10 border-b border-slate-200 bg-white/95 px-4 py-1.5 backdrop-blur lg:px-6">
+    <section className="sticky top-[54px] z-10 border-b border-slate-200 bg-white/95 px-4 py-1.5 backdrop-blur lg:px-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-black text-slate-600">
           <span className="text-slate-900">Bộ lọc</span>
