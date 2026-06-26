@@ -8,7 +8,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return <label className="min-w-0"><span className="mb-0.5 block text-[9px] font-black uppercase tracking-wide text-slate-500">{label}</span>{children}</label>;
 }
 
-const inputClass = 'h-7 w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-bold text-slate-800 shadow-sm outline-none focus:border-red-700/50 focus:ring-2 focus:ring-red-700/10';
+const inputClass = 'h-7 w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-bold text-slate-700 shadow-sm outline-none focus:border-lang-red/40 focus:ring-2 focus:ring-red-100';
 const allValue = 'all';
 
 type UiFilter = Required<Pick<ReportFilter, 'fromDate' | 'toDate' | 'weekCode' | 'branch' | 'channel' | 'costGroup' | 'dataStatus' | 'alertStatus' | 'importedBy'>> & { source: string };
@@ -58,18 +58,18 @@ export function GlobalFilterBar() {
   const clearFilter = () => { setFilter(emptyFilter); router.push(pathname); router.refresh(); };
 
   return (
-    <section className="sticky top-11 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <section className="sticky top-11 z-10 border-b border-slate-200/80 bg-white/95 backdrop-blur">
       <div className="w-full px-3 py-1 sm:px-4 lg:px-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-black text-slate-600"><span className="text-slate-900">Bộ lọc</span><span className="rounded-full bg-slate-100 px-2 py-0.5">{loadingOptions ? 'đang đọc' : `${activeCount} bộ lọc`}</span><span className="rounded-full bg-amber-50 px-2 py-0.5 text-amber-800">{dateLabel}</span>{error ? <span className="rounded-full bg-red-50 px-2 py-0.5 text-red-700">{error}</span> : null}</div>
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-black text-slate-500"><span className="text-slate-800">Bộ lọc</span><span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5">{loadingOptions ? 'đang đọc' : `${activeCount} bộ lọc`}</span><span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">{dateLabel}</span>{error ? <span className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-rose-700">{error}</span> : null}</div>
           <details className="group" open={advancedActive}>
-            <summary className="cursor-pointer list-none rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-black text-slate-700 hover:bg-slate-50">Mở bộ lọc</summary>
-            <div className="mt-1.5 grid min-w-[calc(100vw-1.5rem)] grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm md:grid-cols-4 xl:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+            <summary className="cursor-pointer list-none rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-black text-slate-600 hover:bg-slate-50">Mở bộ lọc</summary>
+            <div className="mt-1.5 grid min-w-[calc(100vw-1.5rem)] grid-cols-2 gap-1.5 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm md:grid-cols-4 xl:grid-cols-[1fr_1fr_1fr_1fr_auto]">
               <Field label="Chi nhánh"><select className={inputClass} value={filter.branch} onChange={(e) => update('branch', e.target.value)}><OptionList values={options?.branches ?? []} allLabel="Tất cả chi nhánh" /></select></Field>
               <Field label="Kỳ báo cáo"><select className={inputClass} value={filter.weekCode} onChange={(e) => update('weekCode', e.target.value)}><OptionList values={options?.weekCodes ?? []} allLabel="Tất cả tuần" /></select></Field>
               <Field label="Từ ngày"><input className={inputClass} type="date" value={filter.fromDate} min={options?.dateRange.min} max={options?.dateRange.max} onChange={(e) => update('fromDate', e.target.value)} /></Field>
               <Field label="Đến ngày"><input className={inputClass} type="date" value={filter.toDate} min={options?.dateRange.min} max={options?.dateRange.max} onChange={(e) => update('toDate', e.target.value)} /></Field>
-              <div className="flex items-end gap-1.5"><button className="h-7 rounded-md bg-red-700 px-2.5 text-[11px] font-black text-white" type="button" onClick={applyFilter}>Làm mới</button><button className="h-7 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-black text-slate-700" type="button" onClick={clearFilter}>Xóa</button></div>
+              <div className="flex items-end gap-1.5"><button className="h-7 rounded-md bg-lang-red px-2.5 text-[11px] font-black text-white" type="button" onClick={applyFilter}>Làm mới</button><button className="h-7 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-black text-slate-600" type="button" onClick={clearFilter}>Xóa</button></div>
               <Field label="Nguồn"><select className={inputClass} value={filter.source} onChange={(e) => update('source', e.target.value)}>{(options?.sources ?? [{ key: allValue, label: 'Tất cả nguồn' }]).map((source) => <option key={source.key} value={source.key}>{source.label}</option>)}</select></Field>
               <Field label="Kênh"><select className={inputClass} value={filter.channel} onChange={(e) => update('channel', e.target.value)}><OptionList values={options?.channels ?? []} allLabel="Tất cả kênh" /></select></Field>
               <Field label="Nhóm chi"><select className={inputClass} value={filter.costGroup} onChange={(e) => update('costGroup', e.target.value)}><OptionList values={options?.channels ?? []} allLabel="Tất cả nhóm" /></select></Field>
