@@ -4,7 +4,7 @@ import { MetricCard } from '@/components/report/MetricCard';
 import { ReportTable } from '@/components/report/ReportTable';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { buildFastLossReport } from '@/lib/reports/fast-page-reports';
+import { buildSnapshotLossReport } from '@/lib/reports/cached-fast-page-reports';
 import { resolvePageSearchParams, type PageSearchParams } from '@/lib/reports/page-search-params';
 
 export const revalidate = 300;
@@ -14,7 +14,7 @@ function parseMoneyText(text: string) {
 }
 
 export default async function ThatThoatChiTietPage({ searchParams }: { searchParams?: PageSearchParams }) {
-  const report = await buildFastLossReport(await resolvePageSearchParams(searchParams));
+  const report = await buildSnapshotLossReport(await resolvePageSearchParams(searchParams));
   const hasLoss = report.sourceCounts.lossRows > 0;
   return (
     <div className="space-y-2.5">
