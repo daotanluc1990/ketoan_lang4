@@ -1,12 +1,20 @@
 import { StatusBadge } from '@/components/report/StatusBadge';
 
-export function PageHeader({ title, description, status }: { title: string; description: string; status?: string }) {
+export function PageHeader({
+  title,
+  description,
+  status,
+}: {
+  title: string;
+  description: string;
+  status?: string;
+}) {
   return (
-    <div className="mb-2 flex flex-col justify-between gap-2 rounded-xl bg-white px-4 py-3 shadow-soft ring-1 ring-black/5 md:flex-row md:items-center lg:px-5 lg:py-3.5">
+    <div className="mb-2 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm md:px-4">
       <div className="min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-lang-red">CEO Report Dashboard</p>
-        <h2 className="mt-0.5 text-lg font-extrabold leading-tight text-lang-brown md:text-xl lg:text-[26px]">{title}</h2>
-        <p className="mt-0.5 max-w-5xl truncate text-xs leading-5 text-black/60 md:text-sm">{description}</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-red-700">Cơm Tấm Làng · ERP mini</p>
+        <h2 className="mt-0.5 truncate text-lg font-black leading-tight text-slate-950 md:text-xl lg:text-2xl">{title}</h2>
+        {description ? <p className="sr-only">{description}</p> : null}
       </div>
       {status ? <div className="shrink-0"><StatusBadge status={status} /></div> : null}
     </div>
