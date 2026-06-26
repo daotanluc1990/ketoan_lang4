@@ -16,5 +16,5 @@ function toneFor(status: string) {
 
 export function ErpStatusBadge({ status }: { status: string }) {
   const tone = toneFor(status);
-  return <span className={clsx('inline-flex min-h-6 items-center rounded-lg border px-2.5 py-0.5 text-[11px] font-black leading-none', toneMap[tone])}>{status}</span>;
+  return <span className={clsx('inline-flex min-h-5 items-center rounded-md border px-2 py-0.5 text-[10px] font-black leading-none', toneMap[tone])}>{status}</span>;
 }
