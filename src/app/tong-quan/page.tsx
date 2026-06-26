@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { buildDashboardReport } from "@/lib/reports/report-aggregator";
 import { resolvePageSearchParams, type PageSearchParams } from "@/lib/reports/page-search-params";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const kpiCopy: Record<string, string> = {
   "Tổng doanh thu": "Cửa hàng + App",
