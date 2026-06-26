@@ -3,6 +3,7 @@ import { MetricCard } from "@/components/report/MetricCard";
 import { ReportTable } from "@/components/report/ReportTable";
 import { PermissionMatrix } from "@/components/report/PermissionMatrix";
 import { AccountingCostCenterPanel } from "@/components/report/AccountingCostCenterPanel";
+import { RefreshReportCacheButton } from "@/components/report/RefreshReportCacheButton";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { buildSnapshotWorkbenchReport } from "@/lib/reports/cached-fast-page-reports";
 import { resolvePageSearchParams, type PageSearchParams } from "@/lib/reports/page-search-params";
@@ -17,6 +18,7 @@ export default async function BanLamViecKeToanPage({ searchParams }: { searchPar
   return (
     <div className="space-y-2.5">
       <PageHeader title="Bàn làm việc kế toán" description="Kiểm tra dữ liệu và việc cần xử lý." status={report.dataQuality.status} />
+      <Card><CardTitle>Làm mới cache báo cáo</CardTitle><div className="mt-2"><RefreshReportCacheButton /></div></Card>
       <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard compact label="Data Quality" value={`${report.dataQuality.score}/100`} status={report.dataQuality.status === "Tốt" ? "good" : "warning"} trend={report.dataQuality.message} />
         <MetricCard compact label="Nguồn còn thiếu" value={`${report.dataQuality.missingRequiredSources.length}`} status={report.dataQuality.missingRequiredSources.length ? "warning" : "good"} trend={report.dataQuality.missingRequiredSources.length ? report.dataQuality.missingRequiredSources.join(", ") : "Đủ nguồn"} />
