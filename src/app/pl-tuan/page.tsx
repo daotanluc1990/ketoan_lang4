@@ -4,10 +4,10 @@ import { MetricCard } from '@/components/report/MetricCard';
 import { ReportTable } from '@/components/report/ReportTable';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { buildFastPnlReport } from '@/lib/reports/fast-page-reports';
+import { buildSnapshotPnlReport } from '@/lib/reports/cached-fast-page-reports';
 import { resolvePageSearchParams, type PageSearchParams } from '@/lib/reports/page-search-params';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 const pnlTrend: Record<string, string> = {
   'Tổng doanh thu': 'Nguồn hiện có',
@@ -19,7 +19,7 @@ const pnlTrend: Record<string, string> = {
 };
 
 export default async function PlTuanPage({ searchParams }: { searchParams?: PageSearchParams }) {
-  const report = await buildFastPnlReport(await resolvePageSearchParams(searchParams));
+  const report = await buildSnapshotPnlReport(await resolvePageSearchParams(searchParams));
   const status = report.hasRealData ? 'Cần đối chiếu' : 'Chưa đủ dữ liệu';
   const pnlKpis = report.executiveKpis.filter((kpi) => Object.keys(pnlTrend).includes(kpi.label));
   const lossKpi = report.executiveKpis.find((kpi) => kpi.label === 'Thất thoát quy tiền')?.value ?? '—';
