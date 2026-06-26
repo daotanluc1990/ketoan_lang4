@@ -19,16 +19,7 @@ function readFilterFromWindow(): UiFilter {
   if (typeof window === 'undefined') return emptyFilter;
   const params = new URLSearchParams(window.location.search);
   return {
-    fromDate: params.get('fromDate') ?? '',
-    toDate: params.get('toDate') ?? '',
-    weekCode: params.get('weekCode') ?? '',
-    branch: params.get('branch') ?? '',
-    channel: params.get('channel') ?? '',
-    costGroup: params.get('costGroup') ?? '',
-    source: params.get('source') ?? allValue,
-    dataStatus: params.get('dataStatus') ?? '',
-    alertStatus: params.get('alertStatus') ?? '',
-    importedBy: params.get('importedBy') ?? ''
+    fromDate: params.get('fromDate') ?? '', toDate: params.get('toDate') ?? '', weekCode: params.get('weekCode') ?? '', branch: params.get('branch') ?? '', channel: params.get('channel') ?? '', costGroup: params.get('costGroup') ?? '', source: params.get('source') ?? allValue, dataStatus: params.get('dataStatus') ?? '', alertStatus: params.get('alertStatus') ?? '', importedBy: params.get('importedBy') ?? ''
   };
 }
 
@@ -46,7 +37,7 @@ export function GlobalFilterBar() {
 
   useEffect(() => {
     let active = true;
-    fetch('/api/reports/filter-options', { cache: 'no-store' })
+    fetch('/api/reports/filter-options', { cache: 'force-cache' })
       .then(async (response) => {
         const payload = await response.json().catch(() => null);
         if (!active) return;
@@ -62,29 +53,15 @@ export function GlobalFilterBar() {
   const activeCount = useMemo(() => Object.entries(filter).filter(([key, value]) => value && !(key === 'source' && value === allValue)).length, [filter]);
   const advancedActive = Boolean(filter.source !== allValue || filter.channel || filter.costGroup || filter.dataStatus || filter.alertStatus || filter.importedBy);
   const dateLabel = filter.fromDate || filter.toDate ? `${filter.fromDate || '—'} → ${filter.toDate || '—'}` : options?.dateRange.min || options?.dateRange.max ? `${options.dateRange.min ?? '—'} → ${options.dateRange.max ?? '—'}` : 'Chưa có khoảng ngày';
-
   const update = (key: keyof UiFilter, value: string) => setFilter((current) => ({ ...current, [key]: value }));
-  const applyFilter = () => {
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    for (const [key, value] of Object.entries(filter)) {
-      if (value && !(key === 'source' && value === allValue)) params.set(key, value); else params.delete(key);
-    }
-    const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
-    router.refresh();
-  };
+  const applyFilter = () => { const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : ''); for (const [key, value] of Object.entries(filter)) { if (value && !(key === 'source' && value === allValue)) params.set(key, value); else params.delete(key); } const query = params.toString(); router.push(query ? `${pathname}?${query}` : pathname); router.refresh(); };
   const clearFilter = () => { setFilter(emptyFilter); router.push(pathname); router.refresh(); };
 
   return (
     <section className="sticky top-11 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="w-full px-3 py-1 sm:px-4 lg:px-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-black text-slate-600">
-            <span className="text-slate-900">Bộ lọc</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">{loadingOptions ? 'đang đọc' : `${activeCount} bộ lọc`}</span>
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-amber-800">{dateLabel}</span>
-            {error ? <span className="rounded-full bg-red-50 px-2 py-0.5 text-red-700">{error}</span> : null}
-          </div>
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-black text-slate-600"><span className="text-slate-900">Bộ lọc</span><span className="rounded-full bg-slate-100 px-2 py-0.5">{loadingOptions ? 'đang đọc' : `${activeCount} bộ lọc`}</span><span className="rounded-full bg-amber-50 px-2 py-0.5 text-amber-800">{dateLabel}</span>{error ? <span className="rounded-full bg-red-50 px-2 py-0.5 text-red-700">{error}</span> : null}</div>
           <details className="group" open={advancedActive}>
             <summary className="cursor-pointer list-none rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-black text-slate-700 hover:bg-slate-50">Mở bộ lọc</summary>
             <div className="mt-1.5 grid min-w-[calc(100vw-1.5rem)] grid-cols-2 gap-1.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm md:grid-cols-4 xl:grid-cols-[1fr_1fr_1fr_1fr_auto]">
