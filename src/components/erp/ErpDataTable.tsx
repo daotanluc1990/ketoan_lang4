@@ -16,28 +16,37 @@ function rowTone(row: string[]) {
   return 'border-l-transparent';
 }
 
+function cellClass(cell: string, cellIndex: number) {
+  if (isNumberCell(cell)) return 'number whitespace-nowrap text-right font-black text-slate-800';
+  if (statusWords.has(cell)) return 'whitespace-nowrap text-left';
+  if (cellIndex <= 1) return 'min-w-[150px] whitespace-normal break-words font-bold text-slate-900';
+  return 'min-w-[140px] whitespace-normal break-words text-slate-600';
+}
+
 export function ErpDataTable({
   title,
   count,
   headers,
   rows,
-  maxHeight = 'max-h-[360px]'
+  maxHeight = 'max-h-[360px]',
+  minWidth = 'min-w-[980px]'
 }: {
   title: string;
   count?: string | number;
   headers: string[];
   rows: string[][];
   maxHeight?: string;
+  minWidth?: string;
 }) {
   const safeRows = rows.length ? rows : [headers.map((_, index) => (index === 0 ? 'Chưa có dữ liệu' : '—'))];
   return (
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex min-h-[56px] items-center justify-between gap-3 border-b border-slate-200 px-4">
+      <div className="flex min-h-[54px] items-center justify-between gap-3 border-b border-slate-200 px-4">
         <h3 className="text-base font-black tracking-[-0.02em] text-slate-950">{title}</h3>
         {count !== undefined ? <span className="grid min-h-6 min-w-6 place-items-center rounded-full bg-red-700 px-2 text-[11px] font-black text-white">{count}</span> : null}
       </div>
       <div className={`overflow-auto ${maxHeight}`}>
-        <table className="min-w-[920px] w-full text-[12px]">
+        <table className={`${minWidth} w-full text-[12px]`}>
           <thead className="sticky top-0 z-10 bg-slate-50 text-left text-[11px] uppercase tracking-wide text-slate-500">
             <tr>{headers.map((header) => <th className="whitespace-nowrap border-b border-slate-200 px-3 py-3 font-black" key={header}>{header}</th>)}</tr>
           </thead>
@@ -45,7 +54,7 @@ export function ErpDataTable({
             {safeRows.map((row, rowIndex) => (
               <tr className={clsx('border-l-4 odd:bg-white even:bg-slate-50/40 hover:bg-red-50/30', rowTone(row))} key={`${title}-${rowIndex}`}>
                 {row.map((cell, cellIndex) => (
-                  <td className={clsx('max-w-[300px] truncate border-b border-slate-100 px-3 py-3 align-middle', isNumberCell(cell) ? 'number text-right font-black text-slate-800' : cellIndex <= 1 ? 'font-bold text-slate-900' : 'text-slate-600')} key={`${title}-${rowIndex}-${cellIndex}`}>
+                  <td className={clsx('border-b border-slate-100 px-3 py-3 align-top leading-5', cellClass(cell, cellIndex))} key={`${title}-${rowIndex}-${cellIndex}`}>
                     {statusWords.has(cell) ? <ErpStatusBadge status={cell} /> : cell}
                   </td>
                 ))}
@@ -54,6 +63,7 @@ export function ErpDataTable({
           </tbody>
         </table>
       </div>
+      <div className="border-t border-slate-100 bg-slate-50 px-4 py-2 text-[11px] font-bold text-slate-500">Kéo ngang trong bảng nếu còn nhiều cột.</div>
     </section>
   );
 }
