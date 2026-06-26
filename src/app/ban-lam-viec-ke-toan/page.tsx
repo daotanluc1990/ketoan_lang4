@@ -47,7 +47,7 @@ export default async function BanLamViecKeToanPage({
 
   return (
     <div className="space-y-2.5">
-      <PageHeader title="Bàn làm việc kế toán" description="Kiểm tra dữ liệu, task, upload và chốt báo cáo." status={report.dataQuality.status} />
+      <PageHeader title="Bàn làm việc kế toán" description="Kiểm tra dữ liệu, task và chốt báo cáo." status={report.dataQuality.status} />
 
       <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard compact label="Data Quality" value={`${report.dataQuality.score}/100`} status={report.dataQuality.status === "Tốt" ? "good" : report.dataQuality.status === "Nguy hiểm" ? "danger" : "warning"} trend={report.dataQuality.message} />
