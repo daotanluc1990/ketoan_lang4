@@ -11,7 +11,17 @@ import { OverviewPilotShell } from '@/components/erp-pilot/OverviewPilotShell';
 import type { AuthUser } from '@/lib/auth/auth-types';
 
 const COLLAPSE_KEY = 'ctl-ceo-sidebar-collapsed';
-const PILOT_ROUTES = new Set(['/tong-quan', '/pl-tuan', '/dong-tien', '/that-thoat-chi-tiet']);
+const PILOT_ROUTES = new Set([
+  '/tong-quan',
+  '/pl-tuan',
+  '/dong-tien',
+  '/can-doi',
+  '/du-toan',
+  '/that-thoat-chi-tiet',
+  '/ban-lam-viec-ke-toan',
+  '/import-nhap-lieu',
+  '/cai-dat-bot'
+]);
 
 function readStoredBool(key: string, fallback: boolean) {
   if (typeof window === 'undefined') return fallback;
