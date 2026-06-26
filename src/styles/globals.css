@@ -4,8 +4,8 @@
 
 :root {
   color-scheme: light;
-  --background: #f8f3e7;
-  --foreground: #1f1b16;
+  --background: #f6f7f9;
+  --foreground: #111827;
 }
 
 html, body {
@@ -17,6 +17,8 @@ html, body {
 
 body {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -25,7 +27,7 @@ a { color: inherit; text-decoration: none; }
 
 .sidebar-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(246, 196, 83, 0.55) rgba(255, 255, 255, 0.08);
+  scrollbar-color: rgba(243, 201, 105, 0.45) rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-scroll::-webkit-scrollbar {
@@ -37,7 +39,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
-  background: rgba(246, 196, 83, 0.55);
+  background: rgba(243, 201, 105, 0.45);
   border-radius: 999px;
 }
 
