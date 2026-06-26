@@ -1,8 +1,9 @@
-import { PageHeader } from '@/components/layout/PageHeader';
+import { ErpDataTable } from '@/components/erp/ErpDataTable';
+import { ErpInsightPanel } from '@/components/erp/ErpInsightPanel';
+import { ErpKpiCard } from '@/components/erp/ErpKpiCard';
+import { ErpPageHeader } from '@/components/erp/ErpPageHeader';
+import { ErpStatusStrip } from '@/components/erp/ErpStatusStrip';
 import { PermissionMatrix } from '@/components/report/PermissionMatrix';
-import { MetricCard } from '@/components/report/MetricCard';
-import { ReportTable } from '@/components/report/ReportTable';
-import { Card, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { getEnvChecklist, hasAiEnv, hasGoogleSheetsEnv, hasTelegramEnv } from '@/lib/env/server-env';
 import { buildSnapshotOverviewReport } from '@/lib/reports/cached-fast-page-reports';
@@ -20,7 +21,10 @@ const thresholdRows = [
 
 export default async function CaiDatBotPage({ searchParams }: { searchParams?: PageSearchParams }) {
   const report = await buildSnapshotOverviewReport(await resolvePageSearchParams(searchParams));
-  const envRows = getEnvChecklist().map((item) => [item.name, item.configured ? 'Đạt' : 'Chưa đủ dữ liệu', item.requiredFor]);
+  const envChecklist = getEnvChecklist();
+  const envRows = envChecklist.map((item) => [item.name, item.configured ? 'Đạt' : 'Chưa đủ dữ liệu', item.requiredFor]);
+  const missingEnv = envChecklist.filter((item) => !item.configured).length;
+  const status = hasGoogleSheetsEnv() ? 'Cần đối chiếu' : 'Chưa đủ dữ liệu';
   const botPreviewRows = [
     ['Tình hình chung', report.hasRealData ? 'Có dữ liệu báo cáo để gửi bot' : 'Chưa đủ dữ liệu để kết luận'],
     ['Kết quả kinh doanh', report.executiveKpis.find((kpi) => kpi.label === 'Tổng doanh thu')?.value ?? '—'],
@@ -29,23 +33,81 @@ export default async function CaiDatBotPage({ searchParams }: { searchParams?: P
   ];
 
   return (
-    <div className="space-y-2.5">
-      <PageHeader title="Cài đặt & Bot báo cáo" description="Ngưỡng cảnh báo, môi trường, bot và phân quyền." status={hasGoogleSheetsEnv() ? 'Cần đối chiếu' : 'Chưa đủ dữ liệu'} />
-      <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard compact label="Google Sheet" value={hasGoogleSheetsEnv() ? 'Đã cấu hình' : 'Thiếu env'} status={hasGoogleSheetsEnv() ? 'good' : 'warning'} trend="Không in secret" />
-        <MetricCard compact label="AI Agent" value={hasAiEnv() ? 'Đã cấu hình' : 'Thiếu env'} status={hasAiEnv() ? 'good' : 'warning'} trend="Gemini/OpenAI" />
-        <MetricCard compact label="Telegram" value={hasTelegramEnv() ? 'Đã cấu hình' : 'Thiếu env'} status={hasTelegramEnv() ? 'good' : 'warning'} trend="Gửi báo cáo" />
-        <MetricCard compact label="RBAC" value="Basic Auth" status="warning" trend="Cần nâng cấp sau" />
+    <div className="space-y-4">
+      <ErpPageHeader
+        eyebrow="Cơm Tấm Làng · ERP Mini"
+        title="Cài đặt & Bot báo cáo"
+        description="Kiểm tra môi trường, ngưỡng cảnh báo, mẫu nội dung bot và phân quyền trước khi gửi báo cáo CEO."
+        status={status}
+        meta={['Không in secret', 'Telegram Bot', 'AI Agent', 'RBAC']}
+      />
+
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <ErpKpiCard label="Google Sheet" value={hasGoogleSheetsEnv() ? 'Đã cấu hình' : 'Thiếu env'} status={hasGoogleSheetsEnv() ? 'good' : 'warning'} trend="Không in secret" icon="GS" />
+        <ErpKpiCard label="AI Agent" value={hasAiEnv() ? 'Đã cấu hình' : 'Thiếu env'} status={hasAiEnv() ? 'good' : 'warning'} trend="Gemini/OpenAI" icon="AI" />
+        <ErpKpiCard label="Telegram" value={hasTelegramEnv() ? 'Đã cấu hình' : 'Thiếu env'} status={hasTelegramEnv() ? 'good' : 'warning'} trend="Gửi báo cáo" icon="BOT" />
+        <ErpKpiCard label="RBAC" value="Session Auth" status="warning" trend="CEO/Kế toán" icon="RBAC" />
       </section>
-      <section className="grid gap-2 xl:grid-cols-2">
-        <Card><CardTitle>Ngưỡng cảnh báo KPI</CardTitle><div className="mt-2"><ReportTable headers={['Chỉ số', 'Tốt', 'Cảnh báo', 'Nguy hiểm']} rows={thresholdRows} maxHeight="max-h-[260px]" /></div></Card>
-        <Card><CardTitle>Trạng thái biến môi trường</CardTitle><div className="mt-2"><ReportTable headers={['Biến', 'Trạng thái', 'Dùng cho']} rows={envRows} maxHeight="max-h-[260px]" /></div></Card>
+
+      <ErpStatusStrip
+        items={[
+          { label: 'Google Sheet', value: hasGoogleSheetsEnv() ? 'Đạt' : 'Thiếu', tone: hasGoogleSheetsEnv() ? 'good' : 'warning', icon: 'GS' },
+          { label: 'AI Agent', value: hasAiEnv() ? 'Đạt' : 'Thiếu', tone: hasAiEnv() ? 'good' : 'warning', icon: 'AI' },
+          { label: 'Telegram', value: hasTelegramEnv() ? 'Đạt' : 'Thiếu', tone: hasTelegramEnv() ? 'good' : 'warning', icon: 'BOT' },
+          { label: 'Env còn thiếu', value: missingEnv, tone: missingEnv ? 'warning' : 'good', icon: 'ENV' },
+          { label: 'Nguồn báo cáo', value: report.hasRealData ? 'Có dữ liệu' : 'Chờ dữ liệu', tone: report.hasRealData ? 'good' : 'warning', icon: 'DATA' },
+          { label: 'Trạng thái', value: status, tone: hasGoogleSheetsEnv() ? 'warning' : 'neutral', icon: 'CHK' }
+        ]}
+      />
+
+      <section className="grid gap-4 xl:grid-cols-2">
+        <ErpDataTable
+          title="Ngưỡng cảnh báo KPI"
+          headers={['Chỉ số', 'Tốt', 'Cảnh báo', 'Nguy hiểm']}
+          rows={thresholdRows}
+          maxHeight="max-h-[280px]"
+        />
+        <ErpDataTable
+          title="Trạng thái biến môi trường"
+          headers={['Biến', 'Trạng thái', 'Dùng cho']}
+          rows={envRows}
+          maxHeight="max-h-[280px]"
+        />
       </section>
-      <section className="grid gap-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <Card><CardTitle>Mẫu nội dung báo cáo bot</CardTitle><div className="mt-2"><ReportTable headers={['Phần', 'Nội dung']} rows={botPreviewRows} maxHeight="max-h-[260px]" /></div></Card>
-        <Card><CardTitle>Cấu hình bot</CardTitle><div className="mt-2 grid gap-2 text-xs font-semibold"><label className="grid gap-1"><span className="text-slate-700">Kênh gửi</span><select className="rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option>Telegram trước</option><option>Zalo sau</option></select></label><label className="grid gap-1"><span className="text-slate-700">Giờ gửi báo cáo tuần</span><input className="rounded-lg border border-slate-200 bg-white px-2 py-1.5" defaultValue="Thứ 2, 09:00" /></label><label className="grid gap-1"><span className="text-slate-700">Gửi khi dữ liệu chưa đủ</span><select className="rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option>Gửi cảnh báo thiếu dữ liệu</option><option>Không gửi</option></select></label><div className="flex flex-wrap gap-2 pt-1"><Button>Gửi test</Button><Button variant="secondary">Lưu cấu hình</Button></div></div></Card>
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <ErpDataTable
+          title="Mẫu nội dung báo cáo bot"
+          headers={['Phần', 'Nội dung']}
+          rows={botPreviewRows}
+          maxHeight="max-h-[280px]"
+        />
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 className="text-base font-black tracking-[-0.02em] text-slate-950">Cấu hình bot</h3>
+          <div className="mt-3 grid gap-3 text-xs font-semibold">
+            <label className="grid gap-1"><span className="text-slate-700">Kênh gửi</span><select className="rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option>Telegram trước</option><option>Zalo sau</option></select></label>
+            <label className="grid gap-1"><span className="text-slate-700">Giờ gửi báo cáo tuần</span><input className="rounded-lg border border-slate-200 bg-white px-2 py-1.5" defaultValue="Thứ 2, 09:00" /></label>
+            <label className="grid gap-1"><span className="text-slate-700">Gửi khi dữ liệu chưa đủ</span><select className="rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option>Gửi cảnh báo thiếu dữ liệu</option><option>Không gửi</option></select></label>
+            <div className="flex flex-wrap gap-2 pt-1"><Button>Gửi test</Button><Button variant="secondary">Lưu cấu hình</Button></div>
+          </div>
+        </section>
       </section>
-      <PermissionMatrix />
+
+      <section className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <ErpInsightPanel
+          title="Điểm cần kiểm trước khi gửi CEO"
+          rows={[
+            { label: 'Không in secret', value: 'Bắt buộc', caption: 'Chỉ hiện trạng thái env, không hiện giá trị', tone: 'good' },
+            { label: 'Dữ liệu thiếu', value: report.missingSources.length, caption: report.missingSources.join(', ') || 'Không thiếu nguồn chính', tone: report.missingSources.length ? 'warning' : 'good' },
+            { label: 'Telegram', value: hasTelegramEnv() ? 'Có thể gửi' : 'Thiếu env', caption: 'Kiểm tra bằng nút Gửi test', tone: hasTelegramEnv() ? 'good' : 'warning' },
+            { label: 'Phân quyền', value: 'CEO/Kế toán', caption: 'Không mở dữ liệu cho role không phù hợp', tone: 'warning' }
+          ]}
+        />
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 className="mb-3 text-base font-black tracking-[-0.02em] text-slate-950">Phân quyền</h3>
+          <PermissionMatrix />
+        </section>
+      </section>
     </div>
   );
 }
