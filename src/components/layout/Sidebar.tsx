@@ -30,7 +30,7 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                 const Icon = item.icon;
                 return (
-                  <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined} className={clsx('flex items-center rounded-lg text-sm font-medium transition', collapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3 py-2.5', active ? 'bg-lang-yellow text-lang-brown shadow' : 'text-white/78 hover:bg-white/10 hover:text-white')}>
+                  <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined} className={clsx('flex items-center rounded-lg text-sm font-medium transition', collapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3 py-2.5', active ? 'bg-white text-lang-redDark shadow-sm' : 'text-white/76 hover:bg-white/10 hover:text-white')}>
                     <Icon className="h-4 w-4 shrink-0" />
                     {!collapsed ? <span className="truncate">{item.label}</span> : null}
                   </Link>
