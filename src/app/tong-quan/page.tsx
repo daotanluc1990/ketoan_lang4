@@ -56,30 +56,30 @@ export default async function TongQuanPage({ searchParams }: { searchParams?: Pa
 
       <section className="grid gap-2 xl:grid-cols-2">
         <Card>
-          <CardTitle>Top vấn đề cần rà trước khi chốt</CardTitle>
+          <CardTitle>Chi theo đơn vị chịu chi</CardTitle>
           <div className="mt-2">
-            <ReportTable headers={["Hạng", "Vấn đề", "Ảnh hưởng", "Nguyên nhân", "Đề xuất xử lý"]} rows={report.issueRows} maxHeight="max-h-[300px]" />
+            <ReportTable headers={["Đơn vị", "Bản chất chi", "Số tiền", "Xử lý kế toán", "Tỷ trọng", "Trạng thái", "Hành động"]} rows={report.cashbookGroupRows} maxHeight="max-h-[300px]" />
           </div>
         </Card>
         <Card>
-          <CardTitle>Thất thoát NVL — cần giải trình</CardTitle>
+          <CardTitle>Top vấn đề cần rà trước khi chốt</CardTitle>
           <div className="mt-2">
-            <ReportTable headers={["NVL", "ĐVT", "Chênh SL", "Giá trị lệch", "Tỷ lệ", "Trạng thái", "Hành động"]} rows={report.lossTop5Rows.map((row) => [row[0], row[1], row[2], row[3], row[4], row[7], row[8]])} maxHeight="max-h-[300px]" />
+            <ReportTable headers={["Hạng", "Vấn đề", "Ảnh hưởng", "Nguyên nhân", "Đề xuất xử lý"]} rows={report.issueRows} maxHeight="max-h-[300px]" />
           </div>
         </Card>
       </section>
 
       <section className="grid gap-2 xl:grid-cols-2">
         <Card>
-          <CardTitle>Độ sẵn sàng nguồn dữ liệu</CardTitle>
+          <CardTitle>Thất thoát NVL — cần giải trình</CardTitle>
           <div className="mt-2">
-            <ReportTable headers={["Sheet", "Vai trò", "Dòng", "Trạng thái", "Ảnh hưởng"]} rows={report.sourceReadinessRows} maxHeight="max-h-[300px]" />
+            <ReportTable headers={["NVL", "ĐVT", "Chênh SL", "Giá trị lệch", "Tỷ lệ", "Trạng thái", "Hành động"]} rows={report.lossTop5Rows.map((row) => [row[0], row[1], row[2], row[3], row[4], row[7], row[8]])} maxHeight="max-h-[300px]" />
           </div>
         </Card>
         <Card>
-          <CardTitle>Bằng chứng tài chính</CardTitle>
+          <CardTitle>Độ sẵn sàng nguồn dữ liệu</CardTitle>
           <div className="mt-2">
-            <ReportTable headers={["Nguồn", "Chỉ số", "Giá trị", "Ghi chú"]} rows={report.financeEvidenceRows} maxHeight="max-h-[300px]" />
+            <ReportTable headers={["Sheet", "Vai trò", "Dòng", "Trạng thái", "Ảnh hưởng"]} rows={report.sourceReadinessRows} maxHeight="max-h-[300px]" />
           </div>
         </Card>
       </section>
