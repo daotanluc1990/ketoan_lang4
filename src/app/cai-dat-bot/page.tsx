@@ -5,7 +5,7 @@ import { ReportTable } from '@/components/report/ReportTable';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { getEnvChecklist, hasAiEnv, hasGoogleSheetsEnv, hasTelegramEnv } from '@/lib/env/server-env';
-import { buildFastOverviewReport } from '@/lib/reports/fast-page-reports';
+import { buildSnapshotOverviewReport } from '@/lib/reports/cached-fast-page-reports';
 import { resolvePageSearchParams, type PageSearchParams } from '@/lib/reports/page-search-params';
 
 export const revalidate = 300;
@@ -19,7 +19,7 @@ const thresholdRows = [
 ];
 
 export default async function CaiDatBotPage({ searchParams }: { searchParams?: PageSearchParams }) {
-  const report = await buildFastOverviewReport(await resolvePageSearchParams(searchParams));
+  const report = await buildSnapshotOverviewReport(await resolvePageSearchParams(searchParams));
   const envRows = getEnvChecklist().map((item) => [item.name, item.configured ? 'Đạt' : 'Chưa đủ dữ liệu', item.requiredFor]);
   const botPreviewRows = [
     ['Tình hình chung', report.hasRealData ? 'Có dữ liệu báo cáo để gửi bot' : 'Chưa đủ dữ liệu để kết luận'],
