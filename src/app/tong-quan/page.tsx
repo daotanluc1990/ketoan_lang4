@@ -4,7 +4,7 @@ import { MetricCard } from "@/components/report/MetricCard";
 import { ReportTable } from "@/components/report/ReportTable";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { buildFastOverviewReport } from "@/lib/reports/fast-page-reports";
+import { buildSnapshotOverviewReport } from "@/lib/reports/cached-fast-page-reports";
 import { resolvePageSearchParams, type PageSearchParams } from "@/lib/reports/page-search-params";
 
 export const revalidate = 300;
@@ -22,7 +22,7 @@ const kpiCopy: Record<string, string> = {
 };
 
 export default async function TongQuanPage({ searchParams }: { searchParams?: PageSearchParams }) {
-  const report = await buildFastOverviewReport(await resolvePageSearchParams(searchParams));
+  const report = await buildSnapshotOverviewReport(await resolvePageSearchParams(searchParams));
   const status = report.hasRealData ? (report.missingSources.length ? "Cần đối chiếu" : "Tốt") : "Chưa đủ dữ liệu";
   const mainKpis = report.executiveKpis.filter((kpi) => Object.keys(kpiCopy).includes(kpi.label));
 
