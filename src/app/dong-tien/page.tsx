@@ -5,7 +5,7 @@ import { Card, CardTitle } from '@/components/ui/Card';
 import { buildDashboardReport } from '@/lib/reports/report-aggregator';
 import { resolvePageSearchParams, type PageSearchParams } from '@/lib/reports/page-search-params';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function DongTienPage({ searchParams }: { searchParams?: PageSearchParams }) {
   const report = await buildDashboardReport(await resolvePageSearchParams(searchParams));
