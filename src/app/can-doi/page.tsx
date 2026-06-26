@@ -3,13 +3,13 @@ import { MetricCard } from '@/components/report/MetricCard';
 import { ReportTable } from '@/components/report/ReportTable';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { buildDashboardReport } from '@/lib/reports/report-aggregator';
+import { buildFastBalanceReport } from '@/lib/reports/fast-page-reports';
 import { resolvePageSearchParams, type PageSearchParams } from '@/lib/reports/page-search-params';
 
 export const revalidate = 60;
 
 export default async function CanDoiPage({ searchParams }: { searchParams?: PageSearchParams }) {
-  const report = await buildDashboardReport(await resolvePageSearchParams(searchParams));
+  const report = await buildFastBalanceReport(await resolvePageSearchParams(searchParams));
   const hasBalanceData = report.sourceCounts.cashbook > 0 || report.sourceCounts.inventory > 0 || report.sourceCounts.lossRows > 0;
   const warningRows = [
     ['Tồn âm', `${report.totals.negativeStockCount} mặt hàng`, 'Rà nhập/xuất/kiểm kê'],
