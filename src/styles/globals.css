@@ -46,3 +46,7 @@ a { color: inherit; text-decoration: none; }
 @media (max-height: 780px) {
   .sidebar-foot { display: none; }
 }
+
+article[class*="min-h-"][class*="rounded-xl"] > p[class*="mt-2"] {
+  display: none;
+}
