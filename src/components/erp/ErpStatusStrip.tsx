@@ -19,11 +19,11 @@ export function ErpStatusStrip({ items }: { items: Array<{ label: string; value:
       {items.map((item, index) => {
         const tone = normalizeTone(item.tone);
         return (
-          <div key={item.label} className={clsx('flex min-h-[56px] items-center gap-2 px-2.5 py-2', index ? 'border-t border-amber-100 md:border-l md:border-t-0' : '')}>
-            <span className={clsx('grid h-7 w-7 shrink-0 place-items-center rounded-lg text-center text-[9px] font-black leading-none ring-1', toneClass[tone])}>{item.icon ?? '•'}</span>
+          <div key={item.label} className={clsx('flex min-h-[44px] items-center gap-1.5 px-2 py-1.5', index ? 'border-t border-amber-100 md:border-l md:border-t-0' : '')}>
+            <span className={clsx('grid h-6 w-6 shrink-0 place-items-center rounded-md text-center text-[8px] font-black leading-none ring-1', toneClass[tone])}>{item.icon ?? '•'}</span>
             <div className="min-w-0">
-              <p className="line-clamp-1 text-[10px] font-black text-slate-600">{item.label}</p>
-              <p className={clsx('number mt-0.5 line-clamp-1 text-[18px] font-black leading-none', tone === 'good' ? 'text-emerald-700' : tone === 'danger' ? 'text-rose-700' : tone === 'warning' ? 'text-orange-600' : 'text-slate-900')}>{item.value}</p>
+              <p className="line-clamp-1 text-[9px] font-black text-slate-600">{item.label}</p>
+              <p className={clsx('number mt-0.5 line-clamp-1 text-[15px] font-black leading-none', tone === 'good' ? 'text-emerald-700' : tone === 'danger' ? 'text-rose-700' : tone === 'warning' ? 'text-orange-600' : 'text-slate-900')}>{item.value}</p>
             </div>
           </div>
         );
