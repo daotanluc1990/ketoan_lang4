@@ -32,12 +32,6 @@ export default async function DongTienPage({ searchParams }: { searchParams?: Pa
         meta={['Tuần/Kỳ theo bộ lọc', 'Nguồn chính: Sổ quỹ', 'Không đổi logic dòng tiền']}
       />
 
-      {!hasCashbook ? (
-        <ErpSectionFrame tone="risk" title="Thiếu dữ liệu sổ quỹ">
-          <p className="text-[12px] font-bold text-amber-900">Cần import sổ quỹ trước khi đọc dòng tiền tuần.</p>
-        </ErpSectionFrame>
-      ) : null}
-
       <ErpSectionFrame tone="kpi" title="Dòng tiền chính" description="Đọc nhanh tiền vào, tiền ra, dòng tiền tạm và khoản cần phân loại.">
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <ErpKpiCard label="Tiền vào" value={moneyIn} status={hasCashbook ? 'good' : 'neutral'} trend="Đã ghi nhận thu" icon="IN" />
@@ -50,7 +44,6 @@ export default async function DongTienPage({ searchParams }: { searchParams?: Pa
       <ErpSectionFrame tone="summary" title="Tóm tắt đối chiếu dòng tiền" contentClassName="p-0">
         <ErpStatusStrip
           items={[
-            { label: 'Sổ quỹ', value: report.sourceCounts.cashbook, tone: hasCashbook ? 'good' : 'danger', icon: 'SQ' },
             { label: 'Tiền vào', value: moneyIn, tone: hasCashbook ? 'good' : 'neutral', icon: 'IN' },
             { label: 'Tiền ra', value: moneyOut, tone: hasCashbook ? 'warning' : 'neutral', icon: 'OUT' },
             { label: 'Chi chưa phân loại', value: unclassified, tone: report.totals.cashUnclassifiedOut ? 'warning' : 'good', icon: 'CHK' },
@@ -88,7 +81,6 @@ export default async function DongTienPage({ searchParams }: { searchParams?: Pa
           <ErpInsightPanel
             title="Tín hiệu dòng tiền"
             rows={[
-              { label: 'Sổ quỹ hợp lệ', value: report.sourceCounts.cashbook, caption: hasCashbook ? 'Có thể đọc' : 'Cần import', tone: hasCashbook ? 'good' : 'danger' },
               { label: 'Dòng tiền tạm', value: cashEnding, caption: 'Số tạm theo dữ liệu hiện có', tone: report.totals.cashEnding < 0 ? 'danger' : 'good' },
               { label: 'Chi cần phân loại', value: unclassified, caption: 'Cần xử lý trước khi chốt', tone: report.totals.cashUnclassifiedOut ? 'warning' : 'good' },
               { label: 'Khoản chi lớn', value: report.cashbookLargeExpenseRows.length, caption: 'Ưu tiên rà chứng từ', tone: report.cashbookLargeExpenseRows.length ? 'warning' : 'neutral' }
