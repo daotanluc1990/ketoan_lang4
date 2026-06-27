@@ -36,7 +36,6 @@ export function ErpInsightPanel({
               <span className={clsx('h-2 w-2 shrink-0 rounded-full', dotTone[tone])} />
               <div className="min-w-0 flex-1">
                 <p className="line-clamp-2 text-[12px] font-bold text-slate-900">{row.label}</p>
-                {row.caption ? <p className="mt-0.5 line-clamp-2 text-[10px] font-semibold text-slate-500">{row.caption}</p> : null}
               </div>
               {row.value !== undefined ? <span className="number max-w-[96px] shrink-0 text-right text-[12px] font-black text-slate-700">{row.value}</span> : null}
             </div>
