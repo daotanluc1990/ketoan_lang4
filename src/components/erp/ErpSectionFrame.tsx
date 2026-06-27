@@ -40,16 +40,16 @@ export function ErpSectionFrame({
   className?: string;
   contentClassName?: string;
 }) {
+  void description;
   return (
     <section className={clsx('overflow-hidden rounded-2xl border', frameTone[tone], className)}>
-      {(title || description || action) ? (
-        <div className="flex min-h-[42px] items-center justify-between gap-3 border-b border-black/5 bg-white/55 px-3.5 py-2">
+      {(title || action) ? (
+        <div className="flex min-h-[38px] items-center justify-between gap-3 border-b border-black/5 bg-white/55 px-3.5 py-1.5">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className={clsx('h-2 w-2 rounded-full', accentTone[tone])} />
               {title ? <h2 className="truncate text-[13px] font-black uppercase tracking-[0.08em] text-slate-800">{title}</h2> : null}
             </div>
-            {description ? <p className="mt-0.5 text-[11px] font-semibold text-slate-500">{description}</p> : null}
           </div>
           {action ? <div className="shrink-0">{action}</div> : null}
         </div>
