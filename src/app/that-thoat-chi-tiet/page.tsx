@@ -31,12 +31,6 @@ export default async function ThatThoatChiTietPage({ searchParams }: { searchPar
         meta={['Tuần/Kỳ theo bộ lọc', 'Nguồn: báo cáo thất thoát NVL', 'Không đổi quy tắc tính thất thoát']}
       />
 
-      {!hasLoss ? (
-        <ErpSectionFrame tone="risk" title="Thiếu dữ liệu thất thoát">
-          <p className="text-[12px] font-bold text-amber-900">Cần import báo cáo thất thoát hoặc dữ liệu NVL đã chuẩn hóa trước khi kết luận.</p>
-        </ErpSectionFrame>
-      ) : null}
-
       <ErpSectionFrame tone="kpi" title="Chỉ số thất thoát chính">
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <ErpKpiCard label="Thất thoát quy tiền" value={lossValue} status={report.totals.lossValue ? 'warning' : 'neutral'} trend="Tổng giá trị lệch" icon="TT" />
@@ -49,7 +43,6 @@ export default async function ThatThoatChiTietPage({ searchParams }: { searchPar
       <ErpSectionFrame tone="summary" title="Risk band thất thoát" contentClassName="p-0">
         <ErpStatusStrip
           items={[
-            { label: 'Dòng dữ liệu', value: report.sourceCounts.lossRows, tone: hasLoss ? 'good' : 'danger', icon: 'DATA' },
             { label: 'Top cần xử lý', value: report.lossTop5Rows.length, tone: report.lossTop5Rows.length ? 'warning' : 'neutral', icon: 'TOP' },
             { label: 'Giá trị top', value: `${totalLossRankingValue.toFixed(1)}tr`, tone: totalLossRankingValue ? 'warning' : 'neutral', icon: 'VND' },
             { label: 'Thiếu/dư', value: 'Tách riêng', tone: 'warning', icon: 'SL' },
