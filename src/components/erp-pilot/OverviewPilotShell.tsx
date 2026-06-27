@@ -76,36 +76,36 @@ export function OverviewPilotShell({ children, user }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-[#f6f7f9] text-slate-950">
       <aside className={`fixed inset-y-0 left-0 z-30 hidden overflow-y-auto border-r border-slate-200 bg-white shadow-[8px_0_28px_rgba(15,23,42,0.05)] transition-[width] duration-200 lg:block ${sidebarWidth}`}>
-        <div className={collapsed ? 'border-b border-slate-200 p-3' : 'border-b border-slate-200 p-3.5'}>
-          <div className={collapsed ? 'flex justify-center' : 'flex items-center gap-2.5'}>
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#b80012] text-base font-black text-white">L</div>
+        <div className={collapsed ? 'border-b border-slate-200 p-2.5' : 'border-b border-slate-200 p-3'}>
+          <div className={collapsed ? 'flex justify-center' : 'flex items-center gap-2'}>
+            <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#b80012] text-sm font-black text-white">L</div>
             {!collapsed ? (
               <div>
-                <div className="text-lg font-black leading-5 text-slate-950">ERP Mini</div>
-                <div className="mt-0.5 text-[11px] font-bold text-slate-500">Kế Toán Cơm Tấm Làng</div>
+                <div className="text-base font-black leading-5 text-slate-950">ERP Mini</div>
+                <div className="mt-0.5 text-[10px] font-bold text-slate-500">Kế Toán Cơm Tấm Làng</div>
               </div>
             ) : null}
           </div>
-          <button className={collapsed ? 'mt-3 h-8 w-full rounded-lg border border-slate-200 bg-white text-[11px] font-black text-slate-600 shadow-sm hover:bg-slate-50' : 'mt-3 h-8 w-full rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-black text-slate-600 shadow-sm hover:bg-slate-50'} type="button" onClick={toggleCollapsed} aria-label={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}>
+          <button className={collapsed ? 'mt-2.5 h-7 w-full rounded-lg border border-slate-200 bg-white text-[10px] font-black text-slate-600 shadow-sm hover:bg-slate-50' : 'mt-2.5 h-7 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-black text-slate-600 shadow-sm hover:bg-slate-50'} type="button" onClick={toggleCollapsed} aria-label={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}>
             {collapsed ? '›' : '‹ Thu gọn'}
           </button>
           {!collapsed ? (
-            <div className="mt-2.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5">
-              <p className="text-[9px] font-black uppercase tracking-[0.13em] text-[#b80012]">Đang xem</p>
-              <p className="mt-0.5 truncate text-[12px] font-black text-slate-900">{meta.title}</p>
+            <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">
+              <p className="text-[8px] font-black uppercase tracking-[0.13em] text-[#b80012]">Đang xem</p>
+              <p className="mt-0.5 truncate text-[11px] font-black text-slate-900">{meta.title}</p>
             </div>
           ) : null}
         </div>
-        <nav className={collapsed ? 'space-y-2.5 p-2' : 'space-y-3 p-2.5'}>
+        <nav className={collapsed ? 'space-y-2 p-1.5' : 'space-y-2.5 p-2'}>
           {navItems.map((group) => (
-            <section className="border-b border-slate-100 pb-2.5 last:border-b-0" key={group.title}>
-              {!collapsed ? <p className="px-2 pb-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-[#b80012]">{group.title}</p> : null}
-              <div className="space-y-1">
+            <section className="border-b border-slate-100 pb-2 last:border-b-0" key={group.title}>
+              {!collapsed ? <p className="px-2 pb-1 text-[9px] font-black uppercase tracking-[0.08em] text-[#b80012]">{group.title}</p> : null}
+              <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const active = pathname === item.href;
                   return (
-                    <Link className={active ? (collapsed ? 'flex h-9 items-center justify-center rounded-lg bg-red-50 text-[13px] font-black text-[#b80012] shadow-[inset_3px_0_0_#b80012]' : 'flex h-9 items-center gap-2.5 rounded-lg bg-red-50 px-2.5 text-[13px] font-black text-[#b80012] shadow-[inset_3px_0_0_#b80012]') : (collapsed ? 'flex h-9 items-center justify-center rounded-lg text-[13px] font-bold text-slate-600 hover:bg-slate-50' : 'flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-bold text-slate-600 hover:bg-slate-50')} href={item.href} key={item.href} title={collapsed ? item.label : undefined}>
-                      <span className="w-4 text-center text-[14px]">{item.icon}</span>
+                    <Link className={active ? (collapsed ? 'flex h-8 items-center justify-center rounded-lg bg-red-50 text-[12px] font-black text-[#b80012] shadow-[inset_3px_0_0_#b80012]' : 'flex h-8 items-center gap-2 rounded-lg bg-red-50 px-2 text-[12px] font-black text-[#b80012] shadow-[inset_3px_0_0_#b80012]') : (collapsed ? 'flex h-8 items-center justify-center rounded-lg text-[12px] font-bold text-slate-600 hover:bg-slate-50' : 'flex h-8 items-center gap-2 rounded-lg px-2 text-[12px] font-bold text-slate-600 hover:bg-slate-50')} href={item.href} key={item.href} title={collapsed ? item.label : undefined}>
+                      <span className="w-4 text-center text-[13px]">{item.icon}</span>
                       {!collapsed ? <span className="min-w-0 flex-1 truncate">{item.label}</span> : null}
                     </Link>
                   );
@@ -118,37 +118,37 @@ export function OverviewPilotShell({ children, user }: { children: React.ReactNo
 
       <div className={`transition-[padding] duration-200 ${contentPadding}`}>
         <header className="sticky top-0 z-20 border-b border-red-900/20 bg-gradient-to-r from-[#8f0010] to-[#b80012] text-white shadow-[0_8px_24px_rgba(143,0,16,0.22)]">
-          <div className="flex min-h-[54px] items-center justify-between gap-3 px-4 lg:px-5">
+          <div className="flex min-h-[48px] items-center justify-between gap-2.5 px-3 lg:px-4">
             <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.16em] text-white/70">Cơm Tấm Làng</p>
-              <h1 className="truncate text-[16px] font-black leading-5 text-white">{meta.title} · ERP Mini</h1>
+              <p className="text-[8px] font-black uppercase tracking-[0.14em] text-white/70">Cơm Tấm Làng</p>
+              <h1 className="truncate text-[14px] font-black leading-4 text-white">{meta.title}</h1>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="hidden rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-black md:inline-flex">Theo bộ lọc</span>
-              <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-slate-700">V4.6</span>
-              <button className="h-8 rounded-lg bg-white px-2.5 text-[11px] font-black text-[#b80012] shadow-sm" type="button" onClick={sendBot}>Gửi test Bot</button>
-              <span className="hidden rounded-lg border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-bold md:inline-flex">{user.displayName} · {user.role}</span>
-              <button className="h-8 rounded-lg bg-white px-2.5 text-[11px] font-black text-[#b80012] shadow-sm" type="button" onClick={logout}>Đăng xuất</button>
+              <span className="hidden rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-black md:inline-flex">Theo bộ lọc</span>
+              <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-700">V4.6</span>
+              <button className="h-7 rounded-lg bg-white px-2 text-[10px] font-black text-[#b80012] shadow-sm" type="button" onClick={sendBot}>Gửi test Bot</button>
+              <span className="hidden rounded-lg border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-bold md:inline-flex">{user.displayName} · {user.role}</span>
+              <button className="h-7 rounded-lg bg-white px-2 text-[10px] font-black text-[#b80012] shadow-sm" type="button" onClick={logout}>Đăng xuất</button>
             </div>
           </div>
         </header>
 
         <PilotFilterBar status={meta.status} />
 
-        <main className="px-3.5 pb-24 pt-3.5 lg:px-5">{children}</main>
+        <main className="px-2.5 pb-20 pt-2.5 lg:px-3.5">{children}</main>
       </div>
 
-      <div className={`fixed bottom-3 right-5 z-30 hidden h-[60px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 shadow-[0_18px_45px_rgba(15,23,42,0.16)] transition-[left] duration-200 xl:flex ${actionLeft}`}>
-        <div className="flex min-w-[220px] items-center gap-2.5">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#b80012] text-sm text-white">▣</div>
-          <div><p className="text-[13px] font-black text-slate-900">{meta.title}</p><p className="text-[11px] font-bold text-slate-500">Theo bộ lọc</p></div>
-          <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-black text-amber-700">{meta.status}</span>
+      <div className={`fixed bottom-2 right-4 z-30 hidden h-[52px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 shadow-[0_18px_45px_rgba(15,23,42,0.16)] transition-[left] duration-200 xl:flex ${actionLeft}`}>
+        <div className="flex min-w-[200px] items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#b80012] text-xs text-white">▣</div>
+          <div><p className="text-[12px] font-black text-slate-900">{meta.title}</p></div>
+          <span className="rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[9px] font-black text-amber-700">{meta.status}</span>
         </div>
-        <div className="flex flex-1 justify-end gap-2.5">
-          <Link className="inline-flex h-9 min-w-[150px] items-center justify-center rounded-xl bg-[#b80012] px-3 text-[12px] font-black text-white" href={meta.primaryHref}>{meta.primaryLabel}</Link>
-          <Link className="inline-flex h-9 min-w-[150px] items-center justify-center rounded-xl border border-[#b80012] bg-white px-3 text-[12px] font-black text-[#b80012]" href="/ban-lam-viec-ke-toan">Đối chiếu dữ liệu</Link>
-          <button className="h-9 min-w-[130px] rounded-xl border border-[#b80012] bg-white px-3 text-[12px] font-black text-[#b80012]" type="button" onClick={() => window.print()}>Xuất báo cáo</button>
-          <Link className="inline-flex h-9 min-w-[120px] items-center justify-center rounded-xl bg-[#b80012] px-3 text-[12px] font-black text-white" href="/that-thoat-chi-tiet">{meta.dangerLabel}</Link>
+        <div className="flex flex-1 justify-end gap-2">
+          <Link className="inline-flex h-8 min-w-[130px] items-center justify-center rounded-lg bg-[#b80012] px-2.5 text-[11px] font-black text-white" href={meta.primaryHref}>{meta.primaryLabel}</Link>
+          <Link className="inline-flex h-8 min-w-[130px] items-center justify-center rounded-lg border border-[#b80012] bg-white px-2.5 text-[11px] font-black text-[#b80012]" href="/ban-lam-viec-ke-toan">Đối chiếu</Link>
+          <button className="h-8 min-w-[110px] rounded-lg border border-[#b80012] bg-white px-2.5 text-[11px] font-black text-[#b80012]" type="button" onClick={() => window.print()}>Xuất báo cáo</button>
+          <Link className="inline-flex h-8 min-w-[100px] items-center justify-center rounded-lg bg-[#b80012] px-2.5 text-[11px] font-black text-white" href="/that-thoat-chi-tiet">{meta.dangerLabel}</Link>
         </div>
       </div>
     </div>
