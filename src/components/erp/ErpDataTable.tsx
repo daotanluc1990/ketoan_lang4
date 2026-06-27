@@ -63,7 +63,6 @@ export function ErpDataTable({
           </tbody>
         </table>
       </div>
-      <div className="border-t border-slate-100 bg-slate-50 px-3.5 py-1.5 text-[10px] font-bold text-slate-500">Kéo ngang trong bảng nếu còn nhiều cột.</div>
     </section>
   );
 }
