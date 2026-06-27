@@ -50,3 +50,54 @@ a { color: inherit; text-decoration: none; }
 article[class*="min-h-"][class*="rounded-xl"] > p[class*="mt-2"] {
   display: none;
 }
+
+main > .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.625rem !important;
+}
+
+main .gap-4 {
+  gap: 0.625rem !important;
+}
+
+main .gap-3 {
+  gap: 0.5rem !important;
+}
+
+main section.rounded-2xl,
+main article.rounded-xl {
+  border-radius: 0.75rem !important;
+}
+
+main article[class*="min-h-"][class*="rounded-xl"] {
+  min-height: 68px !important;
+  padding: 0.5rem !important;
+}
+
+main article[class*="min-h-"][class*="rounded-xl"] p {
+  font-size: 9px !important;
+  line-height: 1.15 !important;
+}
+
+main article[class*="min-h-"][class*="rounded-xl"] .number {
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+
+main h1 {
+  font-size: 20px !important;
+  line-height: 1.1 !important;
+}
+
+main h2,
+main h3 {
+  font-size: 13px !important;
+}
+
+main table {
+  font-size: 10px !important;
+}
+
+main th,
+main td {
+  padding: 0.45rem 0.5rem !important;
+}
