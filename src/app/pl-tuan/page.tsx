@@ -31,8 +31,6 @@ export default async function PlTuanPage({ searchParams }: { searchParams?: Page
     <div className="space-y-4">
       <ErpPageHeader eyebrow="Cơm Tấm Làng · ERP Mini" title="P&L Tuần" description="Doanh thu, giá vốn, chi phí và lợi nhuận tạm." status={status} meta={['Theo bộ lọc', 'Dữ liệu hiện có', 'Số tạm']} />
 
-      {!report.hasRealData ? <ErpSectionFrame tone="risk" title="Thiếu dữ liệu P&L"><p className="text-[12px] font-bold text-amber-900">Cần bổ sung doanh thu, tồn kho, thất thoát và các khoản chi trước khi chốt.</p></ErpSectionFrame> : null}
-
       <ErpSectionFrame tone="kpi" title="Chỉ số tài chính chính">
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
           {pnlKpis.map((kpi) => <ErpKpiCard key={kpi.label} label={kpi.label} value={kpi.value} trend={pnlTrend[kpi.label]?.hint} status={kpi.status ?? 'neutral'} icon={pnlTrend[kpi.label]?.icon} />)}
