@@ -44,12 +44,6 @@ export default async function TongQuanPage({ searchParams }: { searchParams?: Pa
         meta={['Theo bộ lọc', 'Nguồn: Google Sheet', `Cache: snapshot ${report.hasRealData ? 'đang dùng' : 'chờ dữ liệu'}`]}
       />
 
-      {missingSourceCount ? (
-        <ErpSectionFrame tone="risk" title="Nguồn dữ liệu cần bổ sung">
-          <p className="text-[12px] font-bold text-amber-900">Còn {missingSourceCount} nguồn cần bổ sung: <span className="font-black">{report.missingSources.join(', ')}</span>.</p>
-        </ErpSectionFrame>
-      ) : null}
-
       <ErpSectionFrame tone="kpi" title="Chỉ số chính" description="6 chỉ số CEO cần nhìn trước khi xuống bảng chi tiết.">
         <section className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
           {mainKpis.map((kpi) => (
@@ -66,13 +60,12 @@ export default async function TongQuanPage({ searchParams }: { searchParams?: Pa
         </section>
       </ErpSectionFrame>
 
-      <ErpSectionFrame tone="summary" title="Sức khỏe dữ liệu & cảnh báo" contentClassName="p-0">
+      <ErpSectionFrame tone="summary" title="Cảnh báo chính" contentClassName="p-0">
         <ErpStatusStrip
           items={[
-            { label: 'Tất cả vấn đề', value: openTaskCount + issueCount + missingSourceCount, tone: openTaskCount + issueCount + missingSourceCount ? 'warning' : 'good', icon: 'ALL' },
+            { label: 'Tất cả vấn đề', value: openTaskCount + issueCount, tone: openTaskCount + issueCount ? 'warning' : 'good', icon: 'ALL' },
             { label: 'Cần xử lý', value: openTaskCount, tone: openTaskCount ? 'warning' : 'good', icon: 'TASK' },
             { label: 'Vấn đề trước khi chốt', value: issueCount, tone: issueCount ? 'warning' : 'good', icon: 'CHK' },
-            { label: 'Nguồn còn thiếu', value: missingSourceCount, tone: missingSourceCount ? 'danger' : 'good', icon: 'DATA' },
             { label: 'Nguồn đã đạt', value: readySources, tone: readySources ? 'good' : 'neutral', icon: 'OK' },
             { label: 'Thất thoát cần rà', value: report.lossTop5Rows.length, tone: report.lossTop5Rows.length ? 'warning' : 'neutral', icon: 'TT' }
           ]}
